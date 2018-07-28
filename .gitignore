@@ -1,0 +1,8 @@
+/target/
+**/*.rs.bk
+.vscode/
+config.json
+Cargo.lock
+*.iml
+.idea/*
+*.log

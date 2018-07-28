@@ -1,0 +1,6 @@
+[package]
+name = "languagetest"
+version = "0.1.0"
+authors = ["dstu <dstu93@noreply-github.com>"]
+
+[dependencies]
