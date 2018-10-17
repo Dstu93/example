@@ -80,7 +80,7 @@ impl Lexer {
         Ok(tokens)
     }
 
-    fn read_string(mut iter: &mut Peekable<Chars>) -> Result<Token,LexerError> {
+    fn read_string(iter: &mut Peekable<Chars>) -> Result<Token,LexerError> {
         let mut string = String::new();
         loop {
             let n = iter.next();
