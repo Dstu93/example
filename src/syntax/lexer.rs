@@ -127,7 +127,14 @@ pub enum LexerError{
 
 /// language operators like +
 fn is_operator(c: &char) -> bool {
-    c == &'+' || c == &'-' || c == &'*' || c == &'/' || c == &'='
+    c == &'+' ||
+        c == &'-' ||
+        c == &'*' ||
+        c == &'/' ||
+        c == &'=' ||
+        c == &'<' ||
+        c == &'>' ||
+        c == &'!'
 }
 
 fn operator_to_token_type(c: &char) -> TokenType{
@@ -137,13 +144,23 @@ fn operator_to_token_type(c: &char) -> TokenType{
         '*' => TokenType::OperatorMultiplication,
         '/' => TokenType::OperatorDivide,
         '=' => TokenType::OperatorEqual,
+        '!' => TokenType::OperatorNegation,
+        '<' => TokenType::OperatorLessThen,
+        '>' => TokenType::OperatorGreaterThen,
         _ => panic!("cant parse {} to an operator token",c),
     }
 }
 
 /// means brackes and semicolons
 fn is_separator(c: &char) -> bool{
-    c == &'{' || c == &'}' || c == &'(' || c == &')' || c == &';' || c == &',' || c == &'.'
+    c == &'{' ||
+        c == &'}' ||
+        c == &'(' ||
+        c == &')' ||
+        c == &';' ||
+        c == &',' ||
+        c == &'.' ||
+        c == &':'
 }
 
 fn separator_to_token_type(c: &char) -> TokenType {
@@ -153,8 +170,9 @@ fn separator_to_token_type(c: &char) -> TokenType {
         '(' => TokenType::SeparatorBracketOpen,
         ')' => TokenType::SeparatorBracketClose,
         ';' => TokenType::SeparatorSemiColon,
-        ',' => TokenType::SeparatorColon,
+        ',' => TokenType::SeparatorComma,
         '.' => TokenType::SeparatorDot,
+        ':' => TokenType::SeparatorColon,
         _ => panic!("cant parse {} to a separator token",c),
     }
 }
