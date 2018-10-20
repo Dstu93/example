@@ -70,10 +70,15 @@ fn tokenizer_separator_test(){
     let expected = vec![Token::new(TokenType::SeparatorSemiColon,semicolon.to_string(),0)];
     assert_eq!(expected,tokens);
 
-    let colon = ",";
-    let tokens = Lexer::tokenize(&colon).unwrap();
-    let expected = vec![Token::new(TokenType::SeparatorComma, colon.to_string(), 0)];
+    let comma = ",";
+    let tokens = Lexer::tokenize(&comma).unwrap();
+    let expected = vec![Token::new(TokenType::SeparatorComma, comma.to_string(), 0)];
     assert_eq!(expected,tokens);
+
+    let colon = " : ";
+    let tokens = Lexer::tokenize(colon).unwrap();
+    let expected = vec![Token::new(TokenType::SeparatorColon,":".into(),0)];
+    assert_eq!(tokens,expected);
 }
 
 #[test]

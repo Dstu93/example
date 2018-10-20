@@ -153,7 +153,14 @@ fn operator_to_token_type(c: &char) -> TokenType{
 
 /// means brackes and semicolons
 fn is_separator(c: &char) -> bool{
-    c == &'{' || c == &'}' || c == &'(' || c == &')' || c == &';' || c == &',' || c == &'.'
+    c == &'{' ||
+        c == &'}' ||
+        c == &'(' ||
+        c == &')' ||
+        c == &';' ||
+        c == &',' ||
+        c == &'.' ||
+        c == &':'
 }
 
 fn separator_to_token_type(c: &char) -> TokenType {
@@ -165,7 +172,7 @@ fn separator_to_token_type(c: &char) -> TokenType {
         ';' => TokenType::SeparatorSemiColon,
         ',' => TokenType::SeparatorComma,
         '.' => TokenType::SeparatorDot,
-        //TODO add : for Type annotation
+        ':' => TokenType::SeparatorColon,
         _ => panic!("cant parse {} to a separator token",c),
     }
 }
