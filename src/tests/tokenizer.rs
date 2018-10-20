@@ -29,6 +29,16 @@ fn tokenizer_operator_test(){
     let divide = Lexer::tokenize(&src).unwrap();
     let expected = vec![Token::new(TokenType::OperatorDivide,"/".into(),0)];
     assert_eq!(divide,expected);
+
+    let src = " <   ";
+    let less = Lexer::tokenize(src).unwrap();
+    let expected = vec![Token::new(TokenType::OperatorLessThen,"<".into(),0)];
+    assert_eq!(less,expected);
+
+    let src = "  > ";
+    let greater_then = Lexer::tokenize(src).unwrap();
+    let expected = vec![Token::new(TokenType::OperatorGreaterThen,">".into(),0)];
+    assert_eq!(greater_then,expected);
 }
 
 

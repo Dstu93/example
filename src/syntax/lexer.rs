@@ -127,7 +127,14 @@ pub enum LexerError{
 
 /// language operators like +
 fn is_operator(c: &char) -> bool {
-    c == &'+' || c == &'-' || c == &'*' || c == &'/' || c == &'='
+    c == &'+' ||
+        c == &'-' ||
+        c == &'*' ||
+        c == &'/' ||
+        c == &'=' ||
+        c == &'<' ||
+        c == &'>' ||
+        c == &'!'
 }
 
 fn operator_to_token_type(c: &char) -> TokenType{
@@ -137,6 +144,9 @@ fn operator_to_token_type(c: &char) -> TokenType{
         '*' => TokenType::OperatorMultiplication,
         '/' => TokenType::OperatorDivide,
         '=' => TokenType::OperatorEqual,
+        '!' => TokenType::OperatorNegation,
+        '<' => TokenType::OperatorLessThen,
+        '>' => TokenType::OperatorGreaterThen,
         _ => panic!("cant parse {} to an operator token",c),
     }
 }
@@ -155,6 +165,7 @@ fn separator_to_token_type(c: &char) -> TokenType {
         ';' => TokenType::SeparatorSemiColon,
         ',' => TokenType::SeparatorColon,
         '.' => TokenType::SeparatorDot,
+        //TODO add : for Type annotation
         _ => panic!("cant parse {} to a separator token",c),
     }
 }
