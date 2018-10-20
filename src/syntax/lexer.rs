@@ -163,7 +163,7 @@ fn separator_to_token_type(c: &char) -> TokenType {
         '(' => TokenType::SeparatorBracketOpen,
         ')' => TokenType::SeparatorBracketClose,
         ';' => TokenType::SeparatorSemiColon,
-        ',' => TokenType::SeparatorColon,
+        ',' => TokenType::SeparatorComma,
         '.' => TokenType::SeparatorDot,
         //TODO add : for Type annotation
         _ => panic!("cant parse {} to a separator token",c),

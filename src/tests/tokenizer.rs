@@ -72,7 +72,7 @@ fn tokenizer_separator_test(){
 
     let colon = ",";
     let tokens = Lexer::tokenize(&colon).unwrap();
-    let expected = vec![Token::new(TokenType::SeparatorColon,colon.to_string(),0)];
+    let expected = vec![Token::new(TokenType::SeparatorComma, colon.to_string(), 0)];
     assert_eq!(expected,tokens);
 }
 
@@ -101,7 +101,7 @@ fn tokenizer_numbers_test(){
     let invalid_float3 = "9,0";
     let tokens = Lexer::tokenize(&invalid_float3);
     let t9 = Token::new(TokenType::LiteralInteger,"9".into(),0);
-    let t_sep = Token::new(TokenType::SeparatorColon,",".into(),0);
+    let t_sep = Token::new(TokenType::SeparatorComma, ",".into(), 0);
     let t0 = Token::new(TokenType::LiteralInteger,"0".into(),0);
     let expected = Ok(vec![t9,t_sep,t0]);
     assert_eq!(expected,tokens);

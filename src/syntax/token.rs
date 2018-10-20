@@ -11,7 +11,7 @@ pub enum TokenType {
     SeparatorBracketOpen,
     SeparatorBracketClose,
     SeparatorSemiColon,
-    SeparatorColon,
+    SeparatorComma,
     SeparatorDot,
     OperatorPlus,
     OperatorMinus,
