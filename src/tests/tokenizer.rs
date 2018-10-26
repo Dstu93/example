@@ -145,6 +145,12 @@ fn tokenizer_literal_strings_test(){
     let tokens = Lexer::tokenize(&new_string);
     let expected = Ok(vec![Token::new(TokenType::LiteralString, String::from("this is a string"),0)]);
     assert_eq!(expected,tokens);
+
+    let sentence = "this is a penguin emoticon 🐧 \n \n \n \t whdazhwsihawdhasiudhuiawuidh a;;;;;; ,, ++++ ++///";
+    let s = wrap_with_quotes(sentence);
+    let tokens = Lexer::tokenize(&*s);
+    let expected = Ok(vec![Token::new(TokenType::LiteralString, String::from(sentence),0)]);
+    assert_eq!(expected,tokens);
 }
 
 #[test]
