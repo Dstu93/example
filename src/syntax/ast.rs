@@ -86,7 +86,7 @@ pub enum ExpressionKind {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Option<VariableBinding>), //FIXME replace with correct value struct
+    Return(Option<Expression>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
     WhileLoop(Box<Expression>,Block),
