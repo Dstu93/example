@@ -1,5 +1,5 @@
 
-use syntax::DataType;
+use syntax::{DataType,Value};
 
 //FIXME implements method or pub fields?
 
@@ -68,8 +68,9 @@ pub struct VariableBinding {
 /// Enum of different
 #[derive(PartialOrd, PartialEq,Hash,Clone,Debug)]
 pub enum ExpressionKind {
-    /// call of an std function or a user created function
-    FnCall, //TODO how to represent an funcion? Args + Block?
+    /// call of an std function or a user created function,
+    /// String represents the function name
+    FnCall(String,Option<Vec<Argument>>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="
@@ -124,8 +125,6 @@ pub enum BinOp {
 pub enum UnOp {
     /// ! Operator for inverting an single Expression
     Negation,
-
-    //FIXME missing some? bit shift? or something else?
 }
 
 /// represents an block of statements like if {block} else {block}
@@ -134,4 +133,12 @@ pub enum UnOp {
 pub struct Block {
     uid: NodeId,
     statements: Vec<Statement>,
+}
+
+/// Represents a function argument.
+/// An argument consists of an data Type and the concrete value
+#[derive(PartialOrd, PartialEq,Clone,Hash,Debug)]
+pub struct Argument {
+    data_type: DataType,
+    value: Value,
 }
