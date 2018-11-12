@@ -1,5 +1,5 @@
 
-use syntax::{DataType,Value};
+use syntax::{DataType, DataValue};
 
 //FIXME implements method or pub fields?
 
@@ -140,5 +140,5 @@ pub struct Block {
 #[derive(PartialOrd, PartialEq,Clone,Hash,Debug)]
 pub struct Argument {
     data_type: DataType,
-    value: Value,
+    value: DataValue,
 }
