@@ -71,6 +71,9 @@ pub enum ExpressionKind {
     /// call of an std function or a user created function,
     /// String represents the function name
     FnCall(String,Option<Vec<Argument>>),
+    /// Declaration of a new Function, String = Name, Option with possible arguments
+    /// and an Option of an Returned DataType
+    FnDecl(String,Option<Vec<Argument>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="
