@@ -37,20 +37,20 @@ pub struct AbstractSyntaxTree {
 
 //TODO explain what an statement is
 /// Represents an Statement
-#[derive(PartialOrd, PartialEq,Hash,Clone,Debug)]
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Statement {
     uid: NodeId,
     kind: StatementKind,
 }
 
-#[derive(PartialOrd, PartialEq,Hash,Clone,Debug)]
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub enum StatementKind {
     Declaration(VariableBinding,Expression),
     Expression(Expression),
 }
 
 //TODO explain what an expression is
-#[derive(PartialEq, PartialOrd,Hash,Debug,Clone)]
+#[derive(PartialEq, PartialOrd,Debug,Clone)]
 pub struct Expression {
     uid: NodeId,
     kind: ExpressionKind,
@@ -66,7 +66,7 @@ pub struct VariableBinding {
 }
 
 /// Enum of different
-#[derive(PartialOrd, PartialEq,Hash,Clone,Debug)]
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub enum ExpressionKind {
     /// call of an std function or a user created function,
     /// String represents the function name
@@ -132,7 +132,7 @@ pub enum UnOp {
 
 /// represents an block of statements like if {block} else {block}
 /// or an function call like fn doSomething(){block}
-#[derive(PartialOrd, PartialEq,Clone,Hash,Debug)]
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Block {
     uid: NodeId,
     statements: Vec<Statement>,
@@ -140,7 +140,7 @@ pub struct Block {
 
 /// Represents a function argument.
 /// An argument consists of an data Type and the concrete value
-#[derive(PartialOrd, PartialEq,Clone,Hash,Debug)]
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Argument {
     data_type: DataType,
     value: DataValue,
