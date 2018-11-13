@@ -38,36 +38,36 @@ pub struct AbstractSyntaxTree {
 //TODO explain what an statement is
 /// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Statement {
+pub struct Statement<'a> {
     uid: NodeId,
-    kind: StatementKind,
+    kind: StatementKind<'a>,
 }
 
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum StatementKind {
-    Declaration(VariableBinding,Expression),
-    Expression(Expression),
+pub enum StatementKind<'a> {
+    Declaration(VariableBinding<'a>,Expression<'a>),
+    Expression(Expression<'a>),
 }
 
 //TODO explain what an expression is
 #[derive(PartialEq, PartialOrd,Debug,Clone)]
-pub struct Expression {
+pub struct Expression<'a> {
     uid: NodeId,
-    kind: ExpressionKind,
+    kind: ExpressionKind<'a>,
 }
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
 #[derive(PartialEq, PartialOrd,Hash,Debug,Clone)]
-pub struct VariableBinding {
+pub struct VariableBinding<'a> {
     uid: NodeId,
     data_type: DataType,
-    symbol: String,
+    symbol: &'a String,
 }
 
 /// Enum of different
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum ExpressionKind {
+pub enum ExpressionKind<'a> {
     /// call of an std function or a user created function,
     /// String represents the function name
     FnCall(String,Option<Vec<Argument>>),
@@ -75,14 +75,14 @@ pub enum ExpressionKind {
     /// and an Option of an Returned DataType
     FnDecl(String,Option<Vec<Argument>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
-    UnaryOp(UnOp,Box<Expression>),
+    UnaryOp(UnOp,Box<Expression<'a>>),
     /// binary operator like "*" or "!="
-    BinaryOp(BinOp,Box<Expression>,Box<Expression>),
+    BinaryOp(BinOp,Box<Expression<'a>>,Box<Expression<'a>>),
     /// If statement with an optional else block.
     /// if "expression " {block} else {block}
-    If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
+    If(Box<Expression<'a>>,Block<'a>,Option<Block<'a>>), //Expression must be boxed because of recursion
     /// single variable like "counter"
-    Symbol(VariableBinding),
+    Symbol(VariableBinding<'a>),
     /// represents a literal like "42" or "foobar"
     Literal, //FIXME replace with correct value struct
     /// Break of an loop
@@ -90,12 +90,12 @@ pub enum ExpressionKind {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Box<Option<Expression>>),
+    Return(Box<Option<Expression<'a>>>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
-    WhileLoop(Box<Expression>,Block),
+    WhileLoop(Box<Expression<'a>>,Block<'a>),
     /// loop{block}, loops until break or return statement
-    Loop(Block),
+    Loop(Block<'a>),
 }
 
 /// Enum of binary operators
@@ -133,9 +133,9 @@ pub enum UnOp {
 /// represents an block of statements like if {block} else {block}
 /// or an function call like fn doSomething(){block}
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Block {
+pub struct Block<'a> {
     uid: NodeId,
-    statements: Vec<Statement>,
+    statements: Vec<Statement<'a>>,
 }
 
 /// Represents a function argument.
