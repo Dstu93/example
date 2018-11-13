@@ -70,10 +70,10 @@ pub struct VariableBinding<'a> {
 pub enum ExpressionKind<'a> {
     /// call of an std function or a user created function,
     /// String represents the function name
-    FnCall(String,Option<Vec<Argument>>),
+    FnCall(String,Option<Vec<Argument<'a>>>),
     /// Declaration of a new Function, String = Name, Option with possible arguments
     /// and an Option of an Returned DataType
-    FnDecl(String,Option<Vec<Argument>>,Option<DataType>),
+    FnDecl(String,Option<Vec<Argument<'a>>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression<'a>>),
     /// binary operator like "*" or "!="
@@ -141,7 +141,7 @@ pub struct Block<'a> {
 /// Represents a function argument.
 /// An argument consists of an data Type and the concrete value
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Argument {
+pub struct Argument<'a> {
     data_type: DataType,
-    value: DataValue,
+    value: Expression<'a>,
 }
