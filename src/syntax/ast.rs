@@ -84,7 +84,7 @@ pub enum ExpressionKind<'a> {
     /// single variable like "counter"
     Symbol(VariableBinding<'a>),
     /// represents a literal like "42" or "foobar"
-    Literal, //FIXME replace with correct value struct
+    Literal(DataValue),
     /// Break of an loop
     Break,
     /// Continue of an loop
