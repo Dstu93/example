@@ -56,51 +56,51 @@ pub struct AbstractSyntaxTree {
 //TODO explain what an statement is
 /// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Statement<'a> {
+pub struct Statement {
     uid: NodeId,
-    kind: StatementKind<'a>,
+    kind: StatementKind,
 }
 
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum StatementKind<'a> {
-    Declaration(VariableBinding<'a>,Expression<'a>),
-    Expression(Expression<'a>),
+pub enum StatementKind {
+    Declaration(VariableBinding,Expression),
+    Expression(Expression),
 }
 
 //TODO explain what an expression is
 #[derive(PartialEq, PartialOrd,Debug,Clone)]
-pub struct Expression<'a> {
+pub struct Expression {
     uid: NodeId,
-    kind: ExpressionKind<'a>,
+    kind: ExpressionKind,
 }
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
 #[derive(PartialEq, PartialOrd,Hash,Debug,Clone)]
-pub struct VariableBinding<'a> {
+pub struct VariableBinding {
     uid: NodeId,
     data_type: DataType,
-    symbol: &'a String,
+    symbol: SymbolId,
 }
 
 /// Enum of different
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum ExpressionKind<'a> {
+pub enum ExpressionKind {
     /// call of an std function or a user created function,
     /// String represents the function name
-    FnCall(String,Option<Vec<Argument<'a>>>),
+    FnCall(String,Option<Vec<Argument>>),
     /// Declaration of a new Function, String = Name, Option with possible arguments
     /// and an Option of an Returned DataType
-    FnDecl(String,Option<Vec<Argument<'a>>>,Option<DataType>),
+    FnDecl(String,Option<Vec<Argument>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
-    UnaryOp(UnOp,Box<Expression<'a>>),
+    UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="
-    BinaryOp(BinOp,Box<Expression<'a>>,Box<Expression<'a>>),
+    BinaryOp(BinOp,Box<Expression>,Box<Expression>),
     /// If statement with an optional else block.
     /// if "expression " {block} else {block}
-    If(Box<Expression<'a>>,Block<'a>,Option<Block<'a>>), //Expression must be boxed because of recursion
+    If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     /// single variable like "counter"
-    Symbol(VariableBinding<'a>),
+    Symbol(VariableBinding),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
     /// Break of an loop
@@ -108,12 +108,12 @@ pub enum ExpressionKind<'a> {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Box<Option<Expression<'a>>>),
+    Return(Box<Option<Expression>>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
-    WhileLoop(Box<Expression<'a>>,Block<'a>),
+    WhileLoop(Box<Expression>,Block),
     /// loop{block}, loops until break or return statement
-    Loop(Block<'a>),
+    Loop(Block),
 }
 
 /// Enum of binary operators
@@ -151,15 +151,15 @@ pub enum UnOp {
 /// represents an block of statements like if {block} else {block}
 /// or an function call like fn doSomething(){block}
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Block<'a> {
+pub struct Block {
     uid: NodeId,
-    statements: Vec<Statement<'a>>,
+    statements: Vec<Statement>,
 }
 
 /// Represents a function argument.
 /// An argument consists of an data Type and the concrete value
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Argument<'a> {
+pub struct Argument {
     data_type: DataType,
-    value: Expression<'a>,
+    value: Expression,
 }
