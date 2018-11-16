@@ -29,6 +29,24 @@ impl NodeId {
 
 }
 
+/// Represents an Id for identify an Symbol/Variable on the Stack,
+/// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
+#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
+pub struct SymbolId {
+    id: u32
+}
+
+impl SymbolId {
+    pub fn new(id: u32) -> SymbolId {
+        SymbolId{id}
+    }
+
+    /// Returns a new SymbolId which is the successor of this SymbolId
+    pub fn successor(&self) -> SymbolId {
+        SymbolId{id: self.id + 1}
+    }
+}
+
 /// Representation of the abstract syntax tree (short AST).
 /// represents the program in memory
 pub struct AbstractSyntaxTree {
