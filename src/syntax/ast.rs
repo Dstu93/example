@@ -76,7 +76,7 @@ pub struct Expression {
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
-#[derive(PartialEq, PartialOrd,Hash,Debug,Clone)]
+#[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq,Copy)]
 pub struct VariableBinding {
     uid: NodeId,
     data_type: DataType,
