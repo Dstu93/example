@@ -1,8 +1,6 @@
 
 use syntax::{DataType, DataValue};
 
-//FIXME implements method or pub fields?
-
 /// Represents an unique id of an Node in the abstract syntax tree
 #[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Debug,Hash)]
 pub struct NodeId {
@@ -56,15 +54,15 @@ impl SymbolId {
 /// Representation of the abstract syntax tree (short AST).
 /// represents the program in memory
 pub struct AbstractSyntaxTree {
-    //root: AstNode, //FIXME Root Node
+    /// First Statement in the AST, its always the main() function
+    pub root: Statement,
 }
 
-//TODO explain what an statement is
 /// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Statement {
-    uid: NodeId,
-    kind: StatementKind,
+    pub uid: NodeId,
+    pub kind: StatementKind,
 }
 
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
@@ -73,20 +71,20 @@ pub enum StatementKind {
     Expression(Expression),
 }
 
-//TODO explain what an expression is
+/// Represents an Expression
 #[derive(PartialEq, PartialOrd,Debug,Clone)]
 pub struct Expression {
-    uid: NodeId,
-    kind: ExpressionKind,
+    pub uid: NodeId,
+    pub kind: ExpressionKind,
 }
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
 #[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq,Copy)]
 pub struct VariableBinding {
-    uid: NodeId,
-    data_type: DataType,
-    symbol: SymbolId,
+    pub uid: NodeId,
+    pub data_type: DataType,
+    pub symbol: SymbolId,
 }
 
 /// Enum of different
@@ -158,14 +156,14 @@ pub enum UnOp {
 /// or an function call like fn doSomething(){block}
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Block {
-    uid: NodeId,
-    statements: Vec<Statement>,
+    pub uid: NodeId,
+    pub statements: Vec<Statement>,
 }
 
 /// Represents a function argument.
 /// An argument consists of an data Type and the concrete value
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Argument {
-    data_type: DataType,
-    value: Expression,
+    pub data_type: DataType,
+    pub value: Expression,
 }
