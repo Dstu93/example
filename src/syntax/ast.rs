@@ -37,6 +37,7 @@ pub struct SymbolId {
 }
 
 impl SymbolId {
+
     pub fn new(id: u32) -> SymbolId {
         SymbolId{id}
     }
@@ -44,6 +45,11 @@ impl SymbolId {
     /// Returns a new SymbolId which is the successor of this SymbolId
     pub fn successor(&self) -> SymbolId {
         SymbolId{id: self.id + 1}
+    }
+
+    /// returns this id as u32
+    pub fn as_u32(&self) -> u32{
+        self.id
     }
 }
 
