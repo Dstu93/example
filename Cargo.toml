@@ -1,6 +1,6 @@
 [package]
-name = "languagetest"
-version = "0.1.0"
+name = "PaperCastle"
+version = "0.0.1"
 authors = ["dstu <dstu93@noreply-github.com>"]
 
 [dependencies]
