@@ -67,6 +67,15 @@ impl Token {
     pub fn token_type(&self) -> TokenType{
         self.token_type
     }
+
+    pub fn value(&self) -> &String {
+        &self.value
+    }
+
+    /// Consumes this tokens and returns the owned value String
+    pub fn move_value(self) -> String{
+        self.value
+    }
 }
 
 /*
