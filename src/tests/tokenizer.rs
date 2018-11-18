@@ -5,11 +5,15 @@ use frontend::lexer::*;
 
 #[test]
 fn tokenizer_operator_test(){
-    //TODO Equal only if == so = is always an Assignment
-    let src = "=";
+    let src = "==";
     let equal = Lexer::tokenize(&src).unwrap();
     let expected = vec![Token::new(TokenType::OperatorEqual,"=".into(),0),eof()];
     assert_eq!(equal,expected);
+
+    let src = " =";
+    let assign = Lexer::tokenize(src).unwrap();
+    let expected = vec![Token::new(TokenType::Assign,"=".into(),0),eof()];
+    assert_eq!(expected,assign);
 
     let src = "+";
     let plus = Lexer::tokenize(&src).unwrap();
@@ -161,7 +165,7 @@ fn tokenizer_function_test(){
     let function_call = "fn onKey(CTRL){\n  exit(); \n}";
     let tokens = Lexer::tokenize(&function_call).unwrap();
 
-    let keyword_fn = Token::new(TokenType::Identifier,"fn".into(),0);
+    let keyword_fn = Token::new(TokenType::Fn,"fn".into(),0);
     let function_name = Token::new(TokenType::Identifier,"onKey".into(),0);
     let bracket_open = Token::new(TokenType::SeparatorBracketOpen,"(".into(),0);
     let ctrl = Token::new(TokenType::Identifier,"CTRL".into(),0);
@@ -191,7 +195,60 @@ fn tokenizer_function_test(){
     assert_eq!(expected,tokens);
 }
 
-//TODO add test where Emoticon is in identifier
+#[test]
+fn identifier_test() {
+    let src = "let xðłð@łðæſ = 5;";
+    let tokens = Lexer::tokenize(&src);
+    let expected = Err(LexerError::UnknownCharacter('@'));
+    assert_eq!(expected,tokens);
+
+    let src = "let ä = 5;";
+    let tokens = Lexer::tokenize(src);
+    let expected = Ok(vec![
+        Token::new(TokenType::Let,"let".into(),0),
+        Token::new(TokenType::Identifier,"ä".into(),0),
+        Token::new(TokenType::Assign,"=".into(),0),
+        Token::new(TokenType::LiteralInteger,"5".into(),0),
+        Token::new(TokenType::SeparatorSemiColon,";".into(),0),
+        eof()
+    ]);
+    assert_eq!(expected,tokens);
+}
+
+fn keywords_test(){
+    expect_token("fn",TokenType::Fn);
+    expect_token("Fn",TokenType::Identifier);
+
+    expect_token("while",TokenType::While);
+    expect_token("While",TokenType::Identifier);
+
+    expect_token("return",TokenType::Return);
+    expect_token("Return",TokenType::Identifier);
+
+    expect_token("for",TokenType::For);
+    expect_token("For",TokenType::Identifier);
+
+    expect_token("loop",TokenType::Loop);
+    expect_token("Loop",TokenType::Identifier);
+
+    expect_token("break",TokenType::Break);
+    expect_token("Break",TokenType::Identifier);
+
+    expect_token("continue",TokenType::Continue);
+    expect_token("Continue",TokenType::Identifier);
+
+    expect_token("if",TokenType::If);
+    expect_token("If",TokenType::Identifier);
+
+    expect_token("else",TokenType::Else);
+    expect_token("Else",TokenType::Identifier);
+}
+
+fn expect_token(value: &str,kind: TokenType) {
+    let result = Lexer::tokenize(value).unwrap();
+    let expected = vec![Token::new(kind, value.into(), 0),eof()];
+    assert_eq!(expected, result);
+}
 
 
 /// Utility method for wrapping a string with quotes
