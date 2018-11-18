@@ -36,6 +36,8 @@ pub enum TokenType {
     LiteralFloat,
     LiteralBoolean,
     LiteralString,
+    /// End of File
+    EoF,
 }
 
 /// Struct to represent an token in our language.
