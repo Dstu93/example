@@ -38,11 +38,12 @@ pub enum TokenType {
     LiteralString,
 }
 
-//TODO explain meaning of a token
 /// Struct to represent an token in our language.
+/// A Token is the smallest unit of our language, its
+/// represents keywords, names of variables (Identifier) or punctuation like ';' ',' '{'
 #[derive(Eq, PartialEq,Debug,Hash)]
 pub struct Token{
-    token_type: TokenType,
+    kind: TokenType,
     value: String,
     start_position: usize,
 }
@@ -50,8 +51,8 @@ pub struct Token{
 impl Token {
 
     /// creates a new Token.
-    pub fn new(token_type: TokenType, value: String, start_position: usize) -> Token{
-        Token{token_type,value,start_position}
+    pub fn new(kind: TokenType, value: String, start_position: usize) -> Token{
+        Token{ kind,value,start_position}
     }
 
     /// returns the position where this tokens begins.
@@ -64,8 +65,8 @@ impl Token {
         self.start_position + self.value.len()
     }
 
-    pub fn token_type(&self) -> TokenType{
-        self.token_type
+    pub fn kind(&self) -> TokenType{
+        self.kind
     }
 
     pub fn value(&self) -> &String {
