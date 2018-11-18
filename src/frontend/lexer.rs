@@ -1,6 +1,6 @@
 use std::str::Chars;
 use std::iter::Peekable;
-use syntax::token::*;
+use frontend::syntax::{DataValue,DataType,token::*};
 
 /// Lexer for splitting the source code into a vec of tokens
 pub struct Lexer;

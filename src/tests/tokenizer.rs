@@ -1,10 +1,11 @@
 
 
-use syntax::token::*;
-use syntax::lexer::*;
+use frontend::syntax::{*,token::*};
+use frontend::lexer::*;
 
 #[test]
 fn tokenizer_operator_test(){
+    //TODO Equal only if == so = is always an Assignment
     let src = "=";
     let equal = Lexer::tokenize(&src).unwrap();
     let expected = vec![Token::new(TokenType::OperatorEqual,"=".into(),0),eof()];
@@ -189,6 +190,8 @@ fn tokenizer_function_test(){
 
     assert_eq!(expected,tokens);
 }
+
+//TODO add test where Emoticon is in identifier
 
 
 /// Utility method for wrapping a string with quotes
