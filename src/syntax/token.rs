@@ -4,8 +4,18 @@
 /// Types means in this case its meaning
 #[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Hash,Debug)]
 pub enum TokenType {
+    Let,
+    For,
+    Loop,
+    Break,
+    Continue,
+    Return,
+    While,
+    Fn,
+    Assign,
+    If,
+    Else,
     Identifier,
-    Keyword,
     SeparatorCurvedBracketOpen,
     SeparatorCurvedBracketClosed,
     SeparatorBracketOpen,
