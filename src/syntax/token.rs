@@ -77,33 +77,3 @@ impl Token {
         self.value
     }
 }
-
-/*
-/// Enum for separators
-#[derive(Eq, PartialEq,Ord, PartialOrd,Copy, Clone,Debug,Hash)]
-pub enum Separator {
-    CurvedBracketOpen,
-    CurvedBracketClosed,
-    BracketOpen,
-    BracketClose,
-    SemiColon,
-    Colon,
-}
-
-/// Enum for language operators
-#[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Hash,Debug)]
-pub enum Operator {
-    Plus,
-    Minus,
-    Multiplication,
-    Divide,
-    Equal,
-}
-/// Enum of all Keywords
-#[derive(Eq, PartialEq,Ord, PartialOrd,Copy, Clone,Hash,Debug)]
-pub enum Keyword {
-    Let,
-    Fn,
-    OnKey,
-    GlobalKey,
-}*/
