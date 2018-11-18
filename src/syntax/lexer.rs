@@ -77,6 +77,7 @@ impl Lexer {
            return Err(LexerError::UnknownCharacter(c));
         }
 
+        tokens.push(Token::new(TokenType::EoF,"".into(),0));
         Ok(tokens)
     }
 
