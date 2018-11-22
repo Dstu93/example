@@ -30,8 +30,15 @@ impl Lexer {
                 continue;
             }
             if is_operator(&c) {
-                let ttype = operator_to_token_type(&c);
-                tokens.push(Token::new(ttype,c.to_string(),0));
+                let token = if c == '=' && iter.peek().eq(&Some(&'=')){
+                    let mut equal = c.to_string();
+                    equal.push(iter.next().unwrap());
+                    Token::new(TokenType::OperatorEqual,equal,0)
+                } else {
+                    let kind = operator_to_token_type(&c);
+                    Token::new(kind,c.to_string(),0)
+                };
+                tokens.push(token);
                 continue;
             }
             if c == '"' {
@@ -67,7 +74,7 @@ impl Lexer {
             if c.is_alphabetic() {
                 let mut s = String::new();
                 s.push(c);
-                let result = Lexer::read_literal(&mut iter, s);
+                let result = Lexer::read_identifier(&mut iter, s);
                 if result.is_err(){return Err(result.unwrap_err())}
                 tokens.push(result.unwrap());
                 continue;
@@ -92,8 +99,8 @@ impl Lexer {
         };
     }
 
-    /// reads literal from
-    fn read_literal(iter: &mut Peekable<Chars>, mut s: String) -> Result<Token,LexerError> {
+    /// reads identifier or keyword Token from iterator
+    fn read_identifier(iter: &mut Peekable<Chars>, mut s: String) -> Result<Token,LexerError> {
         loop {
             let read_next = {
                 let peek = iter.peek();
@@ -104,9 +111,11 @@ impl Lexer {
             if read_next{
                 s.push(iter.next().unwrap());
             } else {
-                break; }
+                break;
+            }
         }
-        return Ok(Token::new(TokenType::Identifier,s,0));
+        let kind = match_keyword(&*s);
+        return Ok(Token::new(kind,s,0));
     }
 
     fn skip_comment(iter: &mut Peekable<Chars>){
@@ -144,7 +153,7 @@ fn operator_to_token_type(c: &char) -> TokenType{
         '-' => TokenType::OperatorMinus,
         '*' => TokenType::OperatorMultiplication,
         '/' => TokenType::OperatorDivide,
-        '=' => TokenType::OperatorEqual,
+        '=' => TokenType::Assign,
         '!' => TokenType::OperatorNegation,
         '<' => TokenType::OperatorLessThen,
         '>' => TokenType::OperatorGreaterThen,
@@ -175,6 +184,30 @@ fn separator_to_token_type(c: &char) -> TokenType {
         '.' => TokenType::SeparatorDot,
         ':' => TokenType::SeparatorColon,
         _ => panic!("cant parse {} to a separator token",c),
+    }
+}
+
+/// matches an keyword and returns the TokenType, if no keyword matches it returns
+/// identifier as TokenType
+fn match_keyword(value: &str) -> TokenType{
+    match value {
+        "let" => TokenType::Let,
+        "for" => TokenType::For,
+        "loop" => TokenType::Loop,
+        "break" => TokenType::Break,
+        "continue" => TokenType::Continue,
+        "return" => TokenType::Return,
+        "while" => TokenType::While,
+        "fn" => TokenType::Fn,
+        "if" => TokenType::If,
+        "else" => TokenType::Else,
+        "boolean" => TokenType::Boolean,
+        "true" => TokenType::BooleanTrue,
+        "false" => TokenType::BooleanFalse,
+        "integer" => TokenType::Integer,
+        "float" => TokenType::Float,
+        "string" => TokenType::String,
+        _ => TokenType::Identifier
     }
 }
 

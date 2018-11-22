@@ -7,7 +7,7 @@ use frontend::lexer::*;
 fn tokenizer_operator_test(){
     let src = "==";
     let equal = Lexer::tokenize(&src).unwrap();
-    let expected = vec![Token::new(TokenType::OperatorEqual,"=".into(),0),eof()];
+    let expected = vec![Token::new(TokenType::OperatorEqual,"==".into(),0),eof()];
     assert_eq!(equal,expected);
 
     let src = " =";
@@ -193,6 +193,53 @@ fn tokenizer_function_test(){
     ];
 
     assert_eq!(expected,tokens);
+
+    let function = "fn test(){ \
+    loop{ \
+        let a: boolean = false; \
+        if !a {\
+           break;\
+        } else {\
+            continue;\
+        } return;\
+    } }";
+    let tokens = Lexer::tokenize(function).unwrap();
+
+    let expected = vec![
+        Token::new(TokenType::Fn,"fn".into(),0),
+        Token::new(TokenType::Identifier,"test".into(),0),
+        Token::new(TokenType::SeparatorBracketOpen,"(".into(),0),
+        Token::new(TokenType::SeparatorBracketClose,")".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketOpen,"{".into(),0),
+        Token::new(TokenType::Loop,"loop".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketOpen,"{".into(),0),
+        Token::new(TokenType::Let,"let".into(),0),
+        Token::new(TokenType::Identifier,"a".into(),0),
+        Token::new(TokenType::SeparatorColon,":".into(),0),
+        Token::new(TokenType::Boolean,"boolean".into(),0),
+        Token::new(TokenType::Assign,"=".into(),0),
+        Token::new(TokenType::BooleanFalse,"false".into(),0),
+        Token::new(TokenType::SeparatorSemiColon,";".into(),0),
+        Token::new(TokenType::If,"if".into(),0),
+        Token::new(TokenType::OperatorNegation,"!".into(),0),
+        Token::new(TokenType::Identifier,"a".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketOpen,"{".into(),0),
+        Token::new(TokenType::Break,"break".into(),0),
+        Token::new(TokenType::SeparatorSemiColon,";".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketClosed,"}".into(),0),
+        Token::new(TokenType::Else,"else".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketOpen,"{".into(),0),
+        Token::new(TokenType::Continue,"continue".into(),0),
+        Token::new(TokenType::SeparatorSemiColon,";".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketClosed,"}".into(),0),
+        Token::new(TokenType::Return,"return".into(),0),
+        Token::new(TokenType::SeparatorSemiColon,";".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketClosed,"}".into(),0),
+        Token::new(TokenType::SeparatorCurvedBracketClosed,"}".into(),0),
+        eof()
+    ];
+
+    assert_eq!(expected,tokens);
 }
 
 #[test]
@@ -215,6 +262,7 @@ fn identifier_test() {
     assert_eq!(expected,tokens);
 }
 
+#[test]
 fn keywords_test(){
     expect_token("fn",TokenType::Fn);
     expect_token("Fn",TokenType::Identifier);
@@ -242,6 +290,25 @@ fn keywords_test(){
 
     expect_token("else",TokenType::Else);
     expect_token("Else",TokenType::Identifier);
+
+    expect_token("boolean",TokenType::Boolean);
+    expect_token("Boolean",TokenType::Identifier);
+
+    expect_token("integer",TokenType::Integer);
+    expect_token("Integer",TokenType::Identifier);
+
+    expect_token("float",TokenType::Float);
+    expect_token("Float",TokenType::Identifier);
+
+    expect_token("string",TokenType::String);
+    expect_token("String",TokenType::Identifier);
+
+    expect_token("false",TokenType::BooleanFalse);
+    expect_token("False",TokenType::Identifier);
+
+    expect_token("true",TokenType::BooleanTrue);
+    expect_token("True",TokenType::Identifier);
+
 }
 
 fn expect_token(value: &str,kind: TokenType) {
