@@ -1,4 +1,4 @@
-
+use std::sync::mpsc::Receiver;
 
 /// Defines the Type of a Token.
 /// Types means in this case its meaning
@@ -50,7 +50,7 @@ pub enum TokenType {
 /// A Token is the smallest unit of our language, its
 /// represents keywords, names of variables (Identifier) or punctuation like ';' ',' '{'
 #[derive(Eq, PartialEq,Debug,Hash)]
-pub struct Token{
+pub struct Token {
     kind: TokenType,
     value: String,
     start_position: usize,
@@ -85,4 +85,34 @@ impl Token {
     pub fn move_value(self) -> String{
         self.value
     }
+}
+
+
+/// Stream of Tokens.
+pub struct TokenStream {
+    rx: Receiver<Token>,
+}
+
+impl TokenStream{
+
+    /// creates a new empty stream with a receiver to fill this stream
+    pub fn new(rx: Receiver<Token>) -> Self{
+        TokenStream{rx}
+    }
+
+    /// read next token from this stream and blocks the calling thread till a token is received.
+    /// otherwise it will returns None if the stream closed and will never send a next token
+    pub fn next(&self) -> Option<Token>{
+        match self.rx.recv() {
+            Ok(t) => Some(t),
+            Err(_) => None,
+        }
+    }
+
+    /// consumes this stream and collects every token.
+    /// this function blocks the calling thread till every token is received
+    pub fn collect(self) -> Vec<Token>{
+        self.rx.iter().collect()
+    }
+
 }
