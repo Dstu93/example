@@ -1,7 +1,7 @@
 
-use syntax::{DataType, DataValue};
+use frontend::syntax::{DataType, DataValue};
 
-/// Represents an unique id of an Node in the abstract syntax tree
+/// Represents an unique id of an Node in the abstract frontend.syntax tree
 #[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Debug,Hash)]
 pub struct NodeId {
     id: u32,
@@ -51,7 +51,7 @@ impl SymbolId {
     }
 }
 
-/// Representation of the abstract syntax tree (short AST).
+/// Representation of the abstract frontend.syntax tree (short AST).
 /// represents the program in memory
 pub struct AbstractSyntaxTree {
     /// First Statement in the AST, its always the main() function
