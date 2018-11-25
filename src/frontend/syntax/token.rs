@@ -101,7 +101,8 @@ impl TokenStream{
     }
 
     /// read next token from this stream and blocks the calling thread till a token is received.
-    /// otherwise it will returns None if the stream closed and will never send a next token
+    /// otherwise it will returns None if the stream closed and will never send a next token.
+    /// The last token is always an EOF-Token, except the producer fails
     pub fn next(&self) -> Option<Token>{
         match self.rx.recv() {
             Ok(t) => Some(t),
