@@ -1,5 +1,7 @@
 use std::str::Chars;
 use std::iter::Peekable;
+use std::sync::mpsc::{channel,Receiver,Sender};
+use std::thread::{spawn,JoinHandle};
 use frontend::syntax::{DataValue,DataType,token::*};
 
 /// Lexer for splitting the source code into a vec of tokens
@@ -7,11 +9,26 @@ pub struct Lexer;
 
 impl Lexer {
 
-    /// splits src into Tokens.
-    pub fn tokenize(src: &str) -> Result<Vec<Token>,LexerError> {
-        let mut tokens = Vec::<Token>::new();
-        let mut iter = src.chars().into_iter().peekable();
 
+    /// splits the input String into tokens.
+    /// Returns a TokenStream for receiving any produced token and a JoinHandle.
+    /// The JoinHandle returns the State of the Lexer after finishing.
+    /// The listener of the TokenStream will never received an error, if something fails
+    /// in this function, then the Error will be returned over the JoinHandle
+    pub fn tokenize(src: String) -> (TokenStream,JoinHandle<Result<(),LexerError>>) {
+        let (tx,rx) = channel();
+
+        let handle = spawn(move || {
+           Lexer::tokenize_inner(src,tx)
+        });
+
+        (TokenStream::new(rx),handle)
+    }
+
+    /// splits src into Tokens.
+    fn tokenize_inner(src: String,tx: Sender<Token>) -> Result<(),LexerError> {
+        
+        let mut iter = src.chars().into_iter().peekable();
         loop {
 
             let c = iter.next();
@@ -26,7 +43,7 @@ impl Lexer {
             }
             if is_separator(&c) {
                 let ttype = separator_to_token_type(&c);
-                tokens.push(Token::new(ttype,c.to_string(),0));
+                tx.send(Token::new(ttype,c.to_string(),0));
                 continue;
             }
             if is_operator(&c) {
@@ -38,12 +55,14 @@ impl Lexer {
                     let kind = operator_to_token_type(&c);
                     Token::new(kind,c.to_string(),0)
                 };
-                tokens.push(token);
+                tx.send(token);
                 continue;
             }
             if c == '"' {
                 let result = Lexer::read_string(&mut iter);
-                if result.is_ok(){tokens.push(result.unwrap())}
+                if result.is_ok(){
+                    tx.send(result.unwrap());
+                }
                 else { return Err(result.unwrap_err()) }
                 continue;
             }
@@ -63,10 +82,10 @@ impl Lexer {
                 }
                 if s.contains("."){
                     let token = Token::new(TokenType::LiteralFloat,s,0);
-                    tokens.push(token);
+                    tx.send(token);
                 }else {
                     let token = Token::new(TokenType::LiteralInteger, s,0);
-                    tokens.push(token);
+                    tx.send(token);
                 }
                 continue;
             }
@@ -76,7 +95,7 @@ impl Lexer {
                 s.push(c);
                 let result = Lexer::read_identifier(&mut iter, s);
                 if result.is_err(){return Err(result.unwrap_err())}
-                tokens.push(result.unwrap());
+                tx.send(result.unwrap());
                 continue;
             }
 
@@ -84,8 +103,8 @@ impl Lexer {
            return Err(LexerError::UnknownCharacter(c));
         }
 
-        tokens.push(Token::new(TokenType::EoF,"".into(),0));
-        Ok(tokens)
+        tx.send(Token::new(TokenType::EoF,"".into(),0));
+        Ok(())
     }
 
     fn read_string(iter: &mut Peekable<Chars>) -> Result<Token,LexerError> {
