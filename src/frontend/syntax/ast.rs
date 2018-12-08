@@ -53,6 +53,7 @@ impl SymbolId {
 
 /// Representation of the abstract frontend.syntax tree (short AST).
 /// represents the program in memory
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct AbstractSyntaxTree {
     /// First Statement in the AST, its always the main() function
     pub root: Statement,

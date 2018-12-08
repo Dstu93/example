@@ -49,7 +49,7 @@ pub enum TokenType {
 /// Struct to represent an token in our language.
 /// A Token is the smallest unit of our language, its
 /// represents keywords, names of variables (Identifier) or punctuation like ';' ',' '{'
-#[derive(Eq, PartialEq,Debug,Hash)]
+#[derive(Eq, PartialEq,Debug,Hash,Clone)]
 pub struct Token {
     kind: TokenType,
     value: String,
