@@ -66,6 +66,11 @@ impl ASTParser{
 
     fn lookahead(&self) -> Option<&Token> {
         //TODO
+        self.stack.get(0)
+    }
+
+    fn is_next(&self,kind: TokenType) -> bool{
+        //TODO
     }
 }
 
