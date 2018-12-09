@@ -14,6 +14,6 @@ fn main() {
     let src = String::from("fn test(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}");
     println!("{}",&src);
     let ts = Lexer::tokenize(src.clone()).0;
-    let parser = ASTParser::new();
-    let result  = parser.parse(ts);
+    let parser = ASTParser::new(ts);
+    let result  = parser.parse();
 }

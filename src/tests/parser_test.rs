@@ -17,8 +17,8 @@ fn fun_main_function(){
     //TODO build ast for this source code by hand
 
     let (ts,handle) = Lexer::tokenize(src);
-    let parser = ASTParser::new();
-    let ast= parser.parse(ts).expect("expect abstract syntax tree");
+    let parser = ASTParser::new(ts);
+    let ast= parser.parse().expect("expect abstract syntax tree");
 
     //FIXME compare trees
 }
