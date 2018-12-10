@@ -60,18 +60,18 @@ impl ASTParser{
         Ok(fn_unit)
     }
 
-    fn read_next(&mut self) -> Option<Token>{
-        //TODO pop token from stack and push next token to the stack
-    }
-
-    fn lookahead(&self) -> Option<&Token> {
-        //TODO
-        self.stack.get(0)
-    }
-
-    fn is_next(&self,kind: TokenType) -> bool{
-        //TODO
-    }
+//    fn read_next(&mut self) -> Option<Token>{
+//        //TODO pop token from stack and push next token to the stack
+//    }
+//
+//    fn lookahead(&self) -> Option<&Token> {
+//        //TODO
+//        self.stack.get(0)
+//    }
+//
+//    fn is_next(&self,kind: TokenType) -> bool{
+//        //TODO
+//    }
 }
 
 /// checks if parenthesis are balanced
