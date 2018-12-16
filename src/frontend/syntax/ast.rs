@@ -55,8 +55,18 @@ impl SymbolId {
 /// represents the program in memory
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct AbstractSyntaxTree {
-    /// First Statement in the AST, its always the main() function
-    pub root: Statement,
+    pub uid: NodeId,
+    pub nodes: Vec<Statement>,
+}
+
+impl AbstractSyntaxTree{
+    pub fn new(stmts: Vec<Statement>) -> AbstractSyntaxTree{
+        AbstractSyntaxTree{uid: NodeId::new(0),nodes: stmts}
+    }
+
+    pub fn add_stmt(&mut self,stmt: Statement){
+        self.nodes.push(stmt);
+    }
 }
 
 /// Represents an Statement
@@ -64,6 +74,11 @@ pub struct AbstractSyntaxTree {
 pub struct Statement {
     pub uid: NodeId,
     pub kind: StatementKind,
+}
+impl Statement{
+    pub fn new(uid: NodeId,kind: StatementKind) -> Statement{
+        Statement{uid,kind}
+    }
 }
 
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
@@ -78,6 +93,11 @@ pub struct Expression {
     pub uid: NodeId,
     pub kind: ExpressionKind,
 }
+impl Expression{
+    pub fn new(uid: NodeId,kind: ExpressionKind) -> Expression{
+        Expression{uid,kind}
+    }
+}
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
@@ -86,6 +106,11 @@ pub struct VariableBinding {
     pub uid: NodeId,
     pub data_type: DataType,
     pub symbol: SymbolId,
+}
+impl VariableBinding{
+    pub fn new(uid: NodeId,data_type: DataType,symbol: SymbolId) -> VariableBinding{
+        VariableBinding{uid,data_type,symbol}
+    }
 }
 
 /// Enum of all Expressions
@@ -160,6 +185,14 @@ pub struct Block {
     pub uid: NodeId,
     pub statements: Vec<Statement>,
 }
+impl Block{
+    pub fn new(uid: NodeId, stmts: Vec<Statement>) -> Block{
+        Block{uid,statements: stmts}
+    }
+    pub fn add_stmt(&mut self,stmt: Statement){
+        self.statements.push(stmt);
+    }
+}
 
 /// Represents a function argument.
 /// An argument consists of an data Type and the concrete value
@@ -167,4 +200,10 @@ pub struct Block {
 pub struct Argument {
     pub data_type: DataType,
     pub value: Expression,
+}
+
+impl Argument{
+    pub fn new(dtype: DataType,value: Expression) -> Argument{
+        Argument{data_type: dtype,value}
+    }
 }

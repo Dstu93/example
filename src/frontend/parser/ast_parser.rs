@@ -19,11 +19,14 @@ impl ASTParser{
         //JoinHandle einsammeln
         //alle JoinHandle abwarten
 
+        let mut fn_counter = 0;
         // we split the TokenStream in parts, in functions as small units
         // se we can parse them multiple threads
         while !self.stream.is_closed() {
-            let fn_unit = self.separate_function();
+            let fn_unit = self.separate_function()?;
+            fn_counter +=1;
             println!("fn unit: {:#?}",fn_unit);
+            println!("Function Number: {}",fn_counter)
         }
         Err(ParseError::Unknown)
     }
