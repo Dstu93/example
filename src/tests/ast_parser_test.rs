@@ -39,4 +39,5 @@ fn fun_main_function(){
     let main_function = Statement::new(NodeId::new(0),StatementKind::Expression(Expression::new(NodeId::new(1),main_expression)));
 
     let expected_ast = AbstractSyntaxTree::new(vec![main_function]);
+    assert_eq!(expected_ast,ast);
 }
