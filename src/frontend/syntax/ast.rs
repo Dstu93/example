@@ -130,7 +130,7 @@ pub enum ExpressionKind {
     /// if "expression " {block} else {block}
     If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     /// single variable like "counter"
-    Symbol(VariableBinding),
+    Symbol(SymbolId),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
     /// Break of an loop
