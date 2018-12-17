@@ -1,2 +1,2 @@
 pub mod tokenizer;
-pub mod parser_test;
+pub mod ast_parser_test;
