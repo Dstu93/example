@@ -52,10 +52,12 @@ fn function_with_return_type_test(){
     let (ts,handle) = Lexer::tokenize(src.clone());
     let ast = ASTParser::new(ts).parse().expect("expected abstract syntax tree");
 
-
-    let block = Block::new(NodeId::new(2),vec![]);
-    let test_fn_decl = StatementKind::Expression(Expression::new(NodeId::new(1),ExpressionKind::FnDecl("test".into(),block,None,Some(DataType::String))));
-    let test_fn = Statement::new(NodeId::new(0),test_fn_decl);
+    let return_str = Expression::new(NodeId::new(6),ExpressionKind::Literal(DataValue::String("a b c d e f g".into())));
+    let return_expr = Expression::new(NodeId::new(5),ExpressionKind::Return(Box::new(Some(return_str))));
+    let return_stmt = Statement::new(NodeId::new(4),StatementKind::Expression(return_expr));
+    let block = Block::new(NodeId::new(3),vec![return_stmt]);
+    let test_fn_decl = StatementKind::Expression(Expression::new(NodeId::new(2),ExpressionKind::FnDecl("test".into(),block,None,Some(DataType::String))));
+    let test_fn = Statement::new(NodeId::new(1),test_fn_decl);
 
     let expected_ast = AbstractSyntaxTree::new(vec![test_fn]);
     assert_eq!(expected_ast,ast, "We are comparing two ast build from this source: {}",src);
