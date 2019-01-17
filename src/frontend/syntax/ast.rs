@@ -1,4 +1,5 @@
 
+use std::convert::From;
 use frontend::syntax::{DataType, DataValue};
 
 /// Represents an unique id of an Node in the abstract frontend.syntax tree
@@ -27,6 +28,12 @@ impl NodeId {
 
 }
 
+impl From<u32> for NodeId {
+    fn from(n: u32) -> Self {
+        NodeId::new(n)
+    }
+}
+
 /// Represents an Id for identify an Symbol/Variable on the Stack,
 /// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
 #[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
@@ -48,6 +55,12 @@ impl SymbolId {
     /// returns this id as u32
     pub fn as_u32(&self) -> u32{
         self.id
+    }
+}
+
+impl From<u32> for SymbolId {
+    fn from(n: u32) -> Self {
+        SymbolId::new(n)
     }
 }
 
