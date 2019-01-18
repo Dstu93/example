@@ -1,14 +1,10 @@
+use frontend::lexer::Lexer;
+use frontend::parser::ast_parser::*;
+use frontend::syntax::*;
 
 mod frontend;
 #[cfg(test)]
 mod tests;
-
-use std::fs::File;
-use std::io:: {Read,BufRead,BufReader};
-
-use frontend::syntax::*;
-use frontend::lexer::Lexer;
-use frontend::parser::ast_parser::*;
 
 fn main() {
     let src = String::from("fn test(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test1(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test2(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}");
