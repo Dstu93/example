@@ -76,16 +76,19 @@ fn function_with_arguments() {
     let (ts,handle) = Lexer::tokenize(src);
     let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
 
-    let return_value = Expression::new(10.into(),ExpressionKind::Symbol(2.into()));
-    let return_expression = Expression::new(9.into(),ExpressionKind::Return(Some(Box::new(return_value))));
-    let return_statement = Statement::new(8.into(),StatementKind::Expression(return_expression));
-    let y = Expression::new(7.into(),ExpressionKind::Symbol(1.into()));
-    let x = Expression::new(6.into(),ExpressionKind::Symbol(0.into()));
-    let multiplication = Expression::new(5.into(),ExpressionKind::BinaryOp(BinOp::Multi,Box::new(x),Box::new(y)));
+    let return_value = Expression::new(11.into(),ExpressionKind::Symbol(2.into()));
+    let return_expression = Expression::new(10.into(),ExpressionKind::Return(Some(Box::new(return_value))));
+    let return_statement = Statement::new(9.into(),StatementKind::Expression(return_expression));
+    let y = Expression::new(8.into(),ExpressionKind::Symbol(1.into()));
+    let x = Expression::new(7.into(),ExpressionKind::Symbol(0.into()));
+    let multiplication = Expression::new(6.into(),ExpressionKind::BinaryOp(BinOp::Multi,Box::new(x),Box::new(y)));
     let solution_binding = VariableBinding::new(4.into(),DataType::Integer,2.into());
-    let assignment = Statement::new(3.into(),StatementKind::Declaration(solution_binding,multiplication));
+    let assignment = Statement::new(4.into(),StatementKind::Declaration(solution_binding,multiplication));
     let args = vec![DataType::Integer,DataType::Integer];
-    let test_fn_block = Block::new(2.into(),vec![assignment,return_statement]);
-    let fn_declaration = Expression::new(1.into(),ExpressionKind::FnDecl("calculate".into(),test_fn_block,Some(args),Some(DataType::Integer)));
-    let test_fn = Statement::new(0.into(),StatementKind::Expression(fn_declaration));
+    let test_fn_block = Block::new(3.into(),vec![assignment,return_statement]);
+    let fn_declaration = Expression::new(2.into(),ExpressionKind::FnDecl("calculate".into(),test_fn_block,Some(args),Some(DataType::Integer)));
+    let test_fn = Statement::new(1.into(),StatementKind::Expression(fn_declaration));
+
+    let expected_ast = AbstractSyntaxTree::new(vec![test_fn]);
+    assert_eq!(ast,expected_ast);
 }
