@@ -151,7 +151,7 @@ pub enum ExpressionKind {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Box<Option<Expression>>),
+    Return(Option<Box<Expression>>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
     WhileLoop(Box<Expression>,Block),
