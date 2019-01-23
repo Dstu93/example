@@ -294,8 +294,8 @@ fn keywords_test(){
     expect_token("boolean",TokenType::Boolean);
     expect_token("Boolean",TokenType::Identifier);
 
-    expect_token("integer",TokenType::Integer);
-    expect_token("Integer",TokenType::Identifier);
+    expect_token("int",TokenType::Integer);
+    expect_token("Int",TokenType::Identifier);
 
     expect_token("float",TokenType::Float);
     expect_token("Float",TokenType::Identifier);

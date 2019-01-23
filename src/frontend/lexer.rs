@@ -223,7 +223,7 @@ fn match_keyword(value: &str) -> TokenType{
         "boolean" => TokenType::Boolean,
         "true" => TokenType::BooleanTrue,
         "false" => TokenType::BooleanFalse,
-        "integer" => TokenType::Integer,
+        "int" => TokenType::Integer,
         "float" => TokenType::Float,
         "string" => TokenType::String,
         _ => TokenType::Identifier
