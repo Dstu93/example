@@ -68,7 +68,7 @@ fn function_with_return_type_test(){
 #[test]
 fn function_with_arguments() {
     let src = String::from("\
-    fn calculate(x: integer, y: integer): integer {\
+    fn calculate(x: int, y: int): int {\
         let solution: integer = x * y;\
         return solution;\
     }");
