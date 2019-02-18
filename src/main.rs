@@ -3,6 +3,7 @@ use frontend::parser::ast_parser::*;
 use frontend::syntax::*;
 
 mod frontend;
+mod backend;
 #[cfg(test)]
 mod tests;
 
