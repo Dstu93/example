@@ -1,3 +1,5 @@
+extern crate alloc;
+
 use frontend::lexer::Lexer;
 use frontend::parser::ast_parser::*;
 use frontend::syntax::*;
