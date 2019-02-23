@@ -14,8 +14,8 @@ pub struct GCHeap<T> {
 
 impl <T>GCHeap<T> {
 
-    pub fn new() -> Self{
-        GCHeap{heap: Heap::new(),gc: GarbageCollector::new()}
+    pub fn new(heap_size: u32) -> Self{
+        GCHeap{heap: Heap::new(heap_size),gc: GarbageCollector::new()}
     }
     pub fn collect(&mut self) {}
     pub fn alloc(&mut self,v: T) -> Result<Ptr,AllocError>{
@@ -37,36 +37,43 @@ impl Ptr {
     }
 
     fn next(&self) -> Self{
-        Ptr::new(*self.ptr)
+        Ptr::new(*self.ptr +1)
     }
 
     pub fn invalidate(self){}
 
-    pub fn ref_count(&self) -> usize{
+    fn ref_count(&self) -> usize{
         Rc::strong_count(&self.ptr)
     }
 }
 
 struct Heap<T> {
     inner: BTreeMap<Ptr,T>,
-    next_address: u64,
-    size: usize,
+    next_address: u32,
+    size: u32,
 }
 
 impl<T> Heap<T> {
-    pub fn new(size: usize) -> Self{
+    pub fn new(size: u32) -> Self{
         Heap{inner: BTreeMap::new(),next_address: 0,size}
     }
     pub fn alloc(&mut self,v: T) -> Result<Ptr,AllocError>{
-        if  self.inner.len() == self.size || self.next_address == 2^64{
-            return Err(AllocError::OutOfMemory)
+        if self.inner.len() == (self.size as usize) {
+            return Err(AllocError::OutOfMemory);
+        }
+        if self.next_address == ::std::u32::MAX {
+            return Err(AllocError::OutOfAddressSpace);
         }
         //TODO build Ptr, check if is already on heap
         Ok(Ptr::new(32))
     }
+
+    pub fn remove(&mut self, ptr: Ptr){
+        drop(self.inner.remove(&ptr));
+    }
 }
 
-struct GarbageCollector{
+struct GarbageCollector {
 
 }
 
@@ -78,7 +85,12 @@ impl GarbageCollector {
 }
 
 
+/// Enumeration of all errors that can occur when allocating new memory
 #[derive(PartialOrd, PartialEq,Copy, Clone,Ord, Eq,Debug,Hash)]
 enum AllocError {
+    /// The Heap is full and no extra space can be allocated anymore
     OutOfMemory,
+    /// The number of addresses is exhausted
+    OutOfAddressSpace,
 }
+

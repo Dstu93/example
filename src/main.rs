@@ -1,8 +1,9 @@
-extern crate alloc;
-
 use frontend::lexer::Lexer;
 use frontend::parser::ast_parser::*;
 use frontend::syntax::*;
+use std::collections::BTreeMap;
+use backend::memory::Ptr;
+use std::rc::Rc;
 
 mod frontend;
 mod backend;
