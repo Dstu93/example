@@ -19,8 +19,7 @@ impl <T>GCHeap<T> {
     }
     pub fn collect(&mut self) {}
     pub fn alloc(&mut self,v: T) -> Result<Ptr,AllocError>{
-        //TODO
-        Err(AllocError::OutOfMemory)
+        self.alloc(v)
     }
 }
 
@@ -61,7 +60,7 @@ impl<T> Heap<T> {
         if self.inner.len() == (self.size as usize) {
             return Err(AllocError::OutOfMemory);
         }
-        if self.next_address == ::std::u32::MAX {
+        else if self.next_address == ::std::u32::MAX || self.next_address > self.size{
             return Err(AllocError::OutOfAddressSpace);
         }
         //TODO build Ptr, check if is already on heap
@@ -69,7 +68,7 @@ impl<T> Heap<T> {
     }
 
     pub fn remove(&mut self, ptr: Ptr){
-        drop(self.inner.remove(&ptr));
+        self.inner.remove(&ptr);
     }
 }
 
