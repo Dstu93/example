@@ -1,95 +1,88 @@
-use std::hash::Hash;
-use std::collections::HashMap;
-use std::rc::Rc;
-use std::sync::RwLock;
-use std::collections::BTreeMap;
-
-/// Heap where objects can be stored
-/// and the objects without an pointer will be freed automatic
-/// by the Garbage Collector at Runtime
-pub struct GCHeap<T> {
-    heap: Heap<T>,
-    gc: GarbageCollector,
-}
-
-impl <T>GCHeap<T> {
-
-    pub fn new(heap_size: u32) -> Self{
-        GCHeap{heap: Heap::new(heap_size),gc: GarbageCollector::new()}
-    }
-    pub fn collect(&mut self) {}
-    pub fn alloc(&mut self,v: T) -> Result<Ptr,AllocError>{
-        self.alloc(v)
-    }
-}
-
-
-#[derive(Ord, PartialOrd, Eq, PartialEq,Clone,Hash,Debug)]
-pub struct Ptr {
-    ptr: Rc<u32>,
-}
-
-impl Ptr {
-
-    fn new(n: u32) -> Self{
-        Ptr {ptr: Rc::new(n)}
-    }
-
-    fn next(&self) -> Self{
-        Ptr::new(*self.ptr +1)
-    }
-
-    pub fn invalidate(self){}
-
-    fn ref_count(&self) -> usize{
-        Rc::strong_count(&self.ptr)
-    }
-}
-
-struct Heap<T> {
-    inner: BTreeMap<Ptr,T>,
-    next_address: u32,
-    size: u32,
-}
-
-impl<T> Heap<T> {
-    pub fn new(size: u32) -> Self{
-        Heap{inner: BTreeMap::new(),next_address: 0,size}
-    }
-    pub fn alloc(&mut self,v: T) -> Result<Ptr,AllocError>{
-        if self.inner.len() == (self.size as usize) {
-            return Err(AllocError::OutOfMemory);
-        }
-        else if self.next_address == ::std::u32::MAX || self.next_address > self.size{
-            return Err(AllocError::OutOfAddressSpace);
-        }
-        //TODO build Ptr, check if is already on heap
-        Ok(Ptr::new(32))
-    }
-
-    pub fn remove(&mut self, ptr: Ptr){
-        self.inner.remove(&ptr);
-    }
-}
-
-struct GarbageCollector {
-
-}
-
-impl GarbageCollector {
-
-    pub fn new() -> Self{
-        GarbageCollector{}
-    }
-}
-
-
-/// Enumeration of all errors that can occur when allocating new memory
-#[derive(PartialOrd, PartialEq,Copy, Clone,Ord, Eq,Debug,Hash)]
-enum AllocError {
-    /// The Heap is full and no extra space can be allocated anymore
-    OutOfMemory,
-    /// The number of addresses is exhausted
-    OutOfAddressSpace,
-}
-
+//use std::rc::Rc;
+//use std::collections::BTreeMap;
+//use std::iter::Cycle;
+//
+///// Heap where objects can be stored
+///// and the objects without an pointer will be freed automatic
+///// by the Garbage Collector at Runtime
+//pub struct GCHeap<T> {
+//    young: BTreeMap<u32,(u8,T)>,
+//    old: BTreeMap<u32,(u8,T)>,
+//    perm: BTreeMap<u32,T>,
+//    next_address: Cycle<u32>,
+//}
+//
+//impl <T>GCHeap<T> {
+//
+//    pub fn new() -> Self{
+//        GCHeap{
+//            young: BTreeMap::new(),
+//            old: BTreeMap::new(),
+//            perm: BTreeMap::new(),
+//            next_address: Cycle::,
+//        }
+//    }
+//
+//    pub fn minor_collect(&mut self) {
+//        self.young = self.young.into_iter().
+//            filter(|e| e.0.ref_count() == 1 as usize)
+//            .collect();
+//        self.young.iter_mut().for_each(|e| (e.1).0 += 1);
+//    }
+//
+//    pub fn collect(&mut self) {
+//        self.young = self.young.into_iter().filter(|e| e.0.ref_count() == 1 as usize).collect();
+//        self.old = self.old.into_iter().filter(|e| e.0.ref_count() == 1 as usize).collect();
+//    }
+//
+//    pub fn alloc(&mut self, v: T) -> Result<Ptr,AllocError>{
+//        if self.last_address == ::std::u32::MAX {
+//            // TODO start Garbage Collection and search for the next free address
+//            return Err(AllocError::OutOfAddressSpace);
+//        }
+//
+//        let next = self.last_address + 1;
+//        let ptr = Ptr::new(next, HeapGen::Young);
+//        self.last_address = next;
+//        self.young.insert(ptr.clone(),(0,v));
+//        Ok(ptr)
+//    }
+//}
+//
+//
+//#[derive(Ord, PartialOrd, Eq, PartialEq,Clone,Hash,Debug)]
+//pub struct Ptr {
+//    ptr: Rc<(u32,HeapGen)>,
+//}
+//
+//impl Ptr {
+//
+//    fn new(n: u32, gen: HeapGen) -> Self{
+//        Ptr {ptr: Rc::new((n,gen))
+//    }
+//
+//    pub fn invalidate(self){}
+//
+//    fn ref_count(&self) -> usize{
+//        Rc::strong_count(&self.ptr)
+//    }
+//
+//}
+//
+///// Enumeration of all errors that can occur when allocating new memory
+//#[derive(PartialOrd, PartialEq,Copy, Clone,Ord, Eq,Debug,Hash)]
+//pub enum AllocError {
+//    /// The Heap is full and no extra space can be allocated anymore
+//    OutOfMemory,
+//    /// The number of addresses is exhausted
+//    OutOfAddressSpace,
+//}
+//
+///// Small Enum which represents different types of Heaps.
+//#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Hash,Debug)]
+//enum HeapGen {
+//    Young,
+//    Old,
+//    Perm,
+//}
+//

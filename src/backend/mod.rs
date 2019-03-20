@@ -1,2 +1,4 @@
-pub mod interpreter;
-pub mod memory;
+//#[allow(dead_code)]
+//pub mod interpreter;
+//#[allow(dead_code)]
+//pub mod memory;
