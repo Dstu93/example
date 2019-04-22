@@ -18,9 +18,13 @@ impl Lexer {
     pub fn tokenize(src: String) -> (TokenStream,JoinHandle<Result<(),LexerError>>) {
         let (tx,rx) = channel();
 
-        let handle = spawn(move || {
-           Lexer::tokenize_inner(src,tx)
-        });
+        let handle = std::thread::Builder::new()
+            .name("lexer_thread".into())
+            .spawn(move || Lexer::tokenize_inner(src,tx))
+            .expect("could not spawn lexer thread");
+        //let handle = spawn(move || {
+        //   Lexer::tokenize_inner(src,tx)
+        //});
 
         (TokenStream::new(rx),handle)
     }
