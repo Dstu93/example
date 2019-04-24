@@ -72,17 +72,27 @@ impl ASTParser {
 
     /// parses a single function to an Statement
     fn parse_fn(&mut self) -> Result<Statement,ParseError> {
-        let next = self.next();
-        if next.kind() != TokenType::Identifier {
-            return Err(ParseError::WrongToken(next,TokenType::Identifier));
+        let token = self.next();
+        if token.kind() != TokenType::Identifier {
+            return Err(ParseError::WrongToken(token,TokenType::Identifier));
         }
 
+        let fn_name = token.move_value();
+        //expecting parenthesis
+        if self.lookup_next().kind() != TokenType::SeparatorBracketOpen {
+            return Err(ParseError::WrongToken(self.next(), TokenType::SeparatorBracketOpen));
+        }
+
+        while self.lookup_next().kind() != TokenType::SeparatorBracketClose {
+            //TODO
+            //FIXME epected identifier PunctationColon DataType
+        }
 
         unimplemented!("not implemented right now!");
     }
 
     /// Parse the next Expression from the TokenStream
-    fn parse_expression() -> Result<Expression,ParseError> {
+    fn parse_expression(&mut self) -> Result<Expression,ParseError> {
         unimplemented!("not implemented right now!");
     }
 }
