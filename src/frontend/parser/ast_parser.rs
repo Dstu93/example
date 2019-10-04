@@ -1,8 +1,11 @@
 use frontend::syntax::{DataType,DataValue,token::*,ast::*};
+use std::collections::HashMap;
+use std::env::var;
 
 pub struct ASTParser{
     stack: Vec<Token>,
     stream: TokenStream,
+    symbol_table: HashMap<String,SymbolId>,
     current_node_id: NodeId,
 }
 
@@ -12,6 +15,7 @@ impl ASTParser {
         ASTParser {
             stack: Vec::with_capacity(1),
             stream,
+            symbol_table: HashMap::new(),
             current_node_id: 0.into()
         }
     }
@@ -21,15 +25,11 @@ impl ASTParser {
 
         let mut statements = Vec::new();
         loop {
-            let token = self.next();
-            match token.kind() {
-                TokenType::Fn => {
-                    let function = self.parse_fn()?;
-                    statements.push(function);
-                },
-                TokenType::EoF => {break;},
-                _ => {return Err(ParseError::WrongToken(token,TokenType::Fn))}
-            };
+            if self.lookup_next().kind() == TokenType::EoF {
+                break;
+            }
+            let function = self.parse_fn()?;
+            statements.push(function);
         }
 
         let ast = AbstractSyntaxTree::new(statements);
@@ -83,9 +83,17 @@ impl ASTParser {
             return Err(ParseError::WrongToken(self.next(), TokenType::SeparatorBracketOpen));
         }
 
+        let mut args = Vec::new();
         while self.lookup_next().kind() != TokenType::SeparatorBracketClose {
             //TODO
             //FIXME epected identifier PunctationColon DataType
+            let arg = self.parse_argument()?;
+            match arg {
+                None => {},
+                Some(variable_binding) => {
+                    args.push(variable_binding);
+                },
+            };
         }
 
         unimplemented!("not implemented right now!");
@@ -94,6 +102,10 @@ impl ASTParser {
     /// Parse the next Expression from the TokenStream
     fn parse_expression(&mut self) -> Result<Expression,ParseError> {
         unimplemented!("not implemented right now!");
+    }
+
+    fn parse_argument(&mut self) -> Result<Option<VariableBinding>,ParseError> {
+        unimplemented!("not implemented right now");
     }
 }
 

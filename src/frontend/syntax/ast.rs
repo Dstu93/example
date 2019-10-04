@@ -134,7 +134,7 @@ pub enum ExpressionKind {
     FnCall(String,Option<Vec<Argument>>),
     /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
     /// and an Option of an Returned DataType
-    FnDecl(String,Block,Option<Vec<DataType>>,Option<DataType>),
+    FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="

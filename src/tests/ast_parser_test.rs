@@ -63,28 +63,32 @@ fn function_with_return_type_test(){
     assert_eq!(expected_ast,ast, "We are comparing two ast build from this source: {}",src);
 }
 
-//FIXME Return(Option<Box<Expression>>) && Statement(Expression) without NodeId
 
 #[test]
 fn function_with_arguments() {
     let src = String::from("\
     fn calculate(x: int, y: int): int {\
-        let solution: integer = x * y;\
+        let solution: int = x * y;\
         return solution;\
     }");
     println!("src: {}",&src);
     let (ts,handle) = Lexer::tokenize(src);
     let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
 
-    let return_value = Expression::new(11.into(),ExpressionKind::Symbol(2.into()));
-    let return_expression = Expression::new(10.into(),ExpressionKind::Return(Some(Box::new(return_value))));
-    let return_statement = Statement::new(9.into(),StatementKind::Expression(return_expression));
-    let y = Expression::new(8.into(),ExpressionKind::Symbol(1.into()));
-    let x = Expression::new(7.into(),ExpressionKind::Symbol(0.into()));
-    let multiplication = Expression::new(6.into(),ExpressionKind::BinaryOp(BinOp::Multi,Box::new(x),Box::new(y)));
-    let solution_binding = VariableBinding::new(4.into(),DataType::Integer,2.into());
-    let assignment = Statement::new(4.into(),StatementKind::Declaration(solution_binding,multiplication));
-    let args = vec![DataType::Integer,DataType::Integer];
+    let return_value = Expression::new(13.into(),ExpressionKind::Symbol(2.into()));
+    let return_expression = Expression::new(12.into(),ExpressionKind::Return(Some(Box::new(return_value))));
+    let return_statement = Statement::new(11.into(),StatementKind::Expression(return_expression));
+    let y = Expression::new(10.into(),ExpressionKind::Symbol(1.into()));
+    let x = Expression::new(9.into(),ExpressionKind::Symbol(0.into()));
+    let multiplication = Expression::new(8.into(),ExpressionKind::BinaryOp(BinOp::Multi,Box::new(x),Box::new(y)));
+    let solution_binding = VariableBinding::new(7.into(),DataType::Integer,2.into());
+    let assignment = Statement::new(6.into(),StatementKind::Declaration(solution_binding,multiplication));
+
+    //Function declaration
+    let args = vec![
+        VariableBinding::new(4.into(),DataType::Integer, 0.into()),
+        VariableBinding::new(5.into(),DataType::Integer,1.into())
+    ];
     let test_fn_block = Block::new(3.into(),vec![assignment,return_statement]);
     let fn_declaration = Expression::new(2.into(),ExpressionKind::FnDecl("calculate".into(),test_fn_block,Some(args),Some(DataType::Integer)));
     let test_fn = Statement::new(1.into(),StatementKind::Expression(fn_declaration));
