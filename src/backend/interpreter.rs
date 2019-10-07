@@ -15,7 +15,7 @@ impl RuntimeInterpreter {
 
     /// creates a new RuntimeInterpreter Object with an AbstractSyntaxTree to execute
     pub fn new(ast: AbstractSyntaxTree) -> Self{
-        RuntimeInterpreter{symbol_table: HashMap::new(),ast,pos: 0.into()}
+        RuntimeInterpreter{symbol_table: HashMap::new(),ast,pos: 0}
     }
 
     /// starts the RuntimeInterpreter and executes the program described by the AbstractSyntaxTree.

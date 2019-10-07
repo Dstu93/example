@@ -34,35 +34,35 @@ impl From<u32> for NodeId {
     }
 }
 
-/// Represents an Id for identify an Symbol/Variable on the Stack,
-/// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
-#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
-pub struct SymbolId {
-    id: u32
-}
-
-impl SymbolId {
-
-    pub fn new(id: u32) -> SymbolId {
-        SymbolId{id}
-    }
-
-    /// Returns a new SymbolId which is the successor of this SymbolId
-    pub fn successor(&self) -> SymbolId {
-        SymbolId{id: self.id + 1}
-    }
-
-    /// returns this id as u32
-    pub fn as_u32(&self) -> u32{
-        self.id
-    }
-}
-
-impl From<u32> for SymbolId {
-    fn from(n: u32) -> Self {
-        SymbolId::new(n)
-    }
-}
+///// Represents an Id for identify an Symbol/Variable on the Stack,
+///// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
+//#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
+//pub struct SymbolId {
+//    id: u32
+//}
+//
+//impl SymbolId {
+//
+//    pub fn new(id: u32) -> SymbolId {
+//        SymbolId{id}
+//    }
+//
+//    /// Returns a new SymbolId which is the successor of this SymbolId
+//    pub fn successor(&self) -> SymbolId {
+//        SymbolId{id: self.id + 1}
+//    }
+//
+//    /// returns this id as u32
+//    pub fn as_u32(&self) -> u32{
+//        self.id
+//    }
+//}
+//
+//impl From<u32> for SymbolId {
+//    fn from(n: u32) -> Self {
+//        SymbolId::new(n)
+//    }
+//}
 
 /// Representation of the abstract frontend.syntax tree (short AST).
 /// represents the program in memory
@@ -114,14 +114,14 @@ impl Expression{
 
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
-#[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq,Copy)]
+#[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq)]
 pub struct VariableBinding {
     pub uid: NodeId,
     pub data_type: DataType,
-    pub symbol: SymbolId,
+    pub symbol: String,
 }
 impl VariableBinding{
-    pub fn new(uid: NodeId,data_type: DataType,symbol: SymbolId) -> VariableBinding{
+    pub fn new(uid: NodeId,data_type: DataType,symbol: String) -> VariableBinding{
         VariableBinding{uid,data_type,symbol}
     }
 }
@@ -143,7 +143,7 @@ pub enum ExpressionKind {
     /// if "expression " {block} else {block}
     If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     /// single variable like "counter"
-    Symbol(SymbolId),
+    Symbol(String),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
     /// Break of an loop

@@ -1,11 +1,9 @@
-use frontend::syntax::{DataType,DataValue,token::*,ast::*};
-use std::collections::HashMap;
-use std::env::var;
+use frontend::parser::token_pattern::ParseError;
+use frontend::syntax::{ast::*, token::*};
 
 pub struct ASTParser{
     stack: Vec<Token>,
     stream: TokenStream,
-    symbol_table: HashMap<String,SymbolId>,
     current_node_id: NodeId,
 }
 
@@ -15,7 +13,6 @@ impl ASTParser {
         ASTParser {
             stack: Vec::with_capacity(1),
             stream,
-            symbol_table: HashMap::new(),
             current_node_id: 0.into()
         }
     }
@@ -107,16 +104,4 @@ impl ASTParser {
     fn parse_argument(&mut self) -> Result<Option<VariableBinding>,ParseError> {
         unimplemented!("not implemented right now");
     }
-}
-
-#[derive(Eq, PartialEq,Debug,Hash,Clone)]
-pub enum ParseError{
-    Unknown,
-    /// This Number token cant get parsed to a number, its invalid
-    NaN(Token),
-    /// Found, Expected
-    WrongToken(Token,TokenType),
-    /// This Token is not allowed outside of a function
-    OutOfFnScope(Token),
-    Missing(TokenType),
 }

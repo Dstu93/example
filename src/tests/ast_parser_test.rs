@@ -1,7 +1,6 @@
-
-use frontend::syntax::{*,ast::*,token::*};
 use frontend::lexer::*;
 use frontend::parser::ast_parser::*;
+use frontend::syntax::{*, ast::*};
 
 #[test]
 fn fun_main_function(){
@@ -19,12 +18,12 @@ fn fun_main_function(){
     let parser = ASTParser::new(ts);
     let ast= parser.parse().expect("expect abstract syntax tree");
 
-    // a is the first and only symbol, so a is replaced with a 0 as SymbolId
-    let binding = VariableBinding::new(NodeId::new(5),DataType::Boolean,SymbolId::new(0));
+    // a is the first and only symbol
+    let binding = VariableBinding::new(NodeId::new(5),DataType::Boolean,"a".into());
     let boolean_expression = Expression::new(NodeId::new(6),ExpressionKind::Literal(DataValue::Boolean(false)));
     let a_declaration = Statement::new(NodeId::new(4),StatementKind::Declaration(binding,boolean_expression));
 
-    let a = Expression::new(NodeId::new(10),ExpressionKind::Symbol(SymbolId::new(0)));
+    let a = Expression::new(NodeId::new(10),ExpressionKind::Symbol("a".into()));
     let if_condition = Expression::new(NodeId::new(9),ExpressionKind::UnaryOp(UnOp::Negation,Box::new(a)));
     let message = Expression::new(NodeId::new(14),ExpressionKind::Literal(DataValue::String("a is false".into())));
     let args = vec![Argument::new(DataType::String,message)];
@@ -75,19 +74,19 @@ fn function_with_arguments() {
     let (ts,handle) = Lexer::tokenize(src);
     let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
 
-    let return_value = Expression::new(13.into(),ExpressionKind::Symbol(2.into()));
+    let return_value = Expression::new(13.into(),ExpressionKind::Symbol("solution".into()));
     let return_expression = Expression::new(12.into(),ExpressionKind::Return(Some(Box::new(return_value))));
     let return_statement = Statement::new(11.into(),StatementKind::Expression(return_expression));
-    let y = Expression::new(10.into(),ExpressionKind::Symbol(1.into()));
-    let x = Expression::new(9.into(),ExpressionKind::Symbol(0.into()));
+    let y = Expression::new(10.into(),ExpressionKind::Symbol("y".into()));
+    let x = Expression::new(9.into(),ExpressionKind::Symbol("x".into()));
     let multiplication = Expression::new(8.into(),ExpressionKind::BinaryOp(BinOp::Multi,Box::new(x),Box::new(y)));
-    let solution_binding = VariableBinding::new(7.into(),DataType::Integer,2.into());
+    let solution_binding = VariableBinding::new(7.into(),DataType::Integer,"solution".into());
     let assignment = Statement::new(6.into(),StatementKind::Declaration(solution_binding,multiplication));
 
     //Function declaration
     let args = vec![
-        VariableBinding::new(4.into(),DataType::Integer, 0.into()),
-        VariableBinding::new(5.into(),DataType::Integer,1.into())
+        VariableBinding::new(4.into(),DataType::Integer, "x".into()),
+        VariableBinding::new(5.into(),DataType::Integer,"y".into())
     ];
     let test_fn_block = Block::new(3.into(),vec![assignment,return_statement]);
     let fn_declaration = Expression::new(2.into(),ExpressionKind::FnDecl("calculate".into(),test_fn_block,Some(args),Some(DataType::Integer)));
