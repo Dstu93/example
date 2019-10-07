@@ -1,5 +1,5 @@
-use frontend::syntax::token::{Token, TokenType, TokenStream};
-use frontend::syntax::ast::ExpressionKind;
+use crate::frontend::syntax::token::{TokenType, TokenStream, Token};
+use crate::frontend::syntax::ast::ExpressionKind;
 
 /// Small parser template which matches an pattern of Tokens
 /// and parse them to a expression

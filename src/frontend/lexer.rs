@@ -2,7 +2,7 @@ use std::str::Chars;
 use std::iter::Peekable;
 use std::sync::mpsc::{channel, Sender, SendError};
 use std::thread::{spawn,JoinHandle};
-use frontend::syntax::{token::*};
+use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
 
 /// Lexer for splitting the source code into a vec of tokens
 pub struct Lexer;

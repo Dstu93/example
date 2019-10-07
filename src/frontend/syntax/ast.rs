@@ -1,6 +1,6 @@
-
 use std::convert::From;
-use frontend::syntax::{DataType, DataValue};
+
+use crate::frontend::syntax::{DataType, DataValue};
 
 /// Represents an unique id of an Node in the abstract frontend.syntax tree
 #[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Debug,Hash)]

@@ -1,6 +1,7 @@
-use frontend::lexer::*;
-use frontend::parser::ast_parser::*;
-use frontend::syntax::{*, ast::*};
+use crate::frontend::lexer::Lexer;
+use crate::frontend::parser::ast_parser::ASTParser;
+use crate::frontend::syntax::{DataType, DataValue};
+use crate::frontend::syntax::ast::*;
 
 #[test]
 fn fun_main_function(){

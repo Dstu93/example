@@ -1,5 +1,6 @@
-use frontend::parser::token_pattern::ParseError;
-use frontend::syntax::{ast::*, token::*};
+use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, NodeId};
+use crate::frontend::parser::token_pattern::ParseError;
 
 pub struct ASTParser{
     stack: Vec<Token>,

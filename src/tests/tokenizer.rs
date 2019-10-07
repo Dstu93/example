@@ -1,7 +1,6 @@
 
-
-use frontend::syntax::{*,token::*};
-use frontend::lexer::*;
+use crate::frontend::lexer::{Lexer, LexerError};
+use crate::frontend::syntax::token::{TokenType, Token};
 
 #[test]
 fn tokenizer_operator_test(){
