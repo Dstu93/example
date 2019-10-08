@@ -70,7 +70,7 @@ impl ASTParser {
 
     /// parses a single function to an Statement
     fn parse_fn(&mut self) -> Result<Statement,ParseError> {
-        let token = self.next();
+        let token = self.next(); //TODO Token must be a FN
         if token.kind() != TokenType::Identifier {
             return Err(ParseError::WrongToken(token,TokenType::Identifier));
         }
@@ -81,20 +81,23 @@ impl ASTParser {
             return Err(ParseError::WrongToken(self.next(), TokenType::SeparatorBracketOpen));
         }
 
-        let mut args = Vec::new();
-        while self.lookup_next().kind() != TokenType::SeparatorBracketClose {
-            //TODO
-            //FIXME epected identifier PunctationColon DataType
-            let arg = self.parse_argument()?;
-            match arg {
-                None => {},
-                Some(variable_binding) => {
-                    args.push(variable_binding);
-                },
-            };
-        }
+        let args = self.parse_arg_list()?;
 
         unimplemented!("not implemented right now!");
+    }
+
+    /// reads from the Tokenstream to read the argument list from a function signature
+    fn parse_arg_list(&mut self) -> Result<Vec<VariableBinding>,ParseError>{
+        let mut args = Vec::new();
+        while self.lookup_next().kind() != TokenType::SeparatorBracketClose {
+            let arg = self.parse_argument()?;
+            args.push(arg);
+            let next = self.lookup_next().kind();
+            if next != TokenType::SeparatorSemiColon || next != TokenType::SeparatorBracketClose {
+                return Err(ParseError::WrongToken(self.next(), TokenType::SeparatorSemiColon));
+            }
+        }
+        Ok(args)
     }
 
     /// Parse the next Expression from the TokenStream
@@ -102,7 +105,8 @@ impl ASTParser {
         unimplemented!("not implemented right now!");
     }
 
-    fn parse_argument(&mut self) -> Result<Option<VariableBinding>,ParseError> {
+    fn parse_argument(&mut self) -> Result<VariableBinding,ParseError> {
+        //identifier :
         unimplemented!("not implemented right now");
     }
 }
