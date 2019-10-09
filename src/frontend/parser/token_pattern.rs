@@ -24,7 +24,7 @@ pub enum ParseError{
     /// This Number token cant get parsed to a number, its invalid
     NaN(Token),
     /// Found, Expected
-    WrongToken(Token,TokenType),
+    WrongToken(Token,Vec<TokenType>),
     /// This Token is not allowed outside of a function
     OutOfFnScope(Token),
     Missing(TokenType),
