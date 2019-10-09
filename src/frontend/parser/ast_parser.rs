@@ -3,6 +3,8 @@ use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBindi
 use crate::frontend::parser::token_pattern::ParseError;
 use crate::frontend::syntax::DataType;
 
+const TOKEN_STACK_SIZE: usize = 3;
+
 pub struct ASTParser{
     stack: Vec<Token>,
     stream: TokenStream,
@@ -13,7 +15,7 @@ impl ASTParser {
 
     pub fn new(stream: TokenStream) -> Self {
         ASTParser {
-            stack: Vec::with_capacity(1),
+            stack: Vec::with_capacity(TOKEN_STACK_SIZE),
             stream,
             current_node_id: 0.into()
         }
@@ -37,18 +39,12 @@ impl ASTParser {
 
     /// we initialise our stack with the next 3 tokens
     fn init_stack(&mut self){
-        let mut counter = 0;
-        while counter < 3 {
+        for _ in 0..TOKEN_STACK_SIZE {
             match self.stream.next() {
-                None => {
-                    break;
-                },
-                Some(t) => {
-                    self.stack.push(t);
-                },
+                None => {break;},
+                Some(t) => { self.stack.push(t); },
             };
-            counter += 1;
-        };
+        }
     }
 
     /// Returns next token from the stack, panics if read after EOF
