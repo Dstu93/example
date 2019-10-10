@@ -70,7 +70,11 @@ impl ASTParser {
             return Err(ParseError::WrongToken(token,vec![TokenType::Fn]));
         }
 
-        let fn_name = token.move_value();
+        if self.lookup_next().kind() != TokenType::Identifier {
+            return Err(ParseError::WrongToken(self.next(),vec![TokenType::Identifier]));
+        }
+
+        let fn_name = self.next().move_value();
         //expecting parenthesis
         if self.lookup_next().kind() != TokenType::SeparatorBracketOpen {
             return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorBracketOpen]));
