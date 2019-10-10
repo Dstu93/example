@@ -163,7 +163,7 @@ impl ASTParser {
         Ok(datatype)
     }
 
-    pub fn parse_stmt(&mut self) -> Result<Statement,ParseError>{
+    fn parse_stmt(&mut self) -> Result<Statement,ParseError>{
         unimplemented!("statement parsing is not implemented yet");
     }
 
