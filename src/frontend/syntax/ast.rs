@@ -2,38 +2,6 @@ use std::convert::From;
 
 use crate::frontend::syntax::{DataType, DataValue};
 
-/// Represents an unique id of an Node in the abstract frontend.syntax tree
-#[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Debug,Hash)]
-pub struct NodeId {
-    id: u32,
-}
-
-impl NodeId {
-
-    /// Creates a new NodeId with a certain id
-    pub fn new(id: u32) -> NodeId{
-        NodeId{id}
-    }
-
-    /// creates a new NodeId which is the successor of the given NodeId
-    pub fn new_next_id(node: NodeId) -> NodeId{
-        let next = node.as_u32() + 1;
-        NodeId::new(next)
-    }
-
-    /// returns the unique id as u32
-    pub fn as_u32(&self) -> u32{
-        self.id
-    }
-
-}
-
-impl From<u32> for NodeId {
-    fn from(n: u32) -> Self {
-        NodeId::new(n)
-    }
-}
-
 ///// Represents an Id for identify an Symbol/Variable on the Stack,
 ///// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
 //#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
@@ -68,13 +36,12 @@ impl From<u32> for NodeId {
 /// represents the program in memory
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct AbstractSyntaxTree {
-    pub uid: NodeId,
     pub nodes: Vec<Statement>,
 }
 
 impl AbstractSyntaxTree{
     pub fn new(stmts: Vec<Statement>) -> AbstractSyntaxTree{
-        AbstractSyntaxTree{uid: NodeId::new(0),nodes: stmts}
+        AbstractSyntaxTree{nodes: stmts}
     }
 
     pub fn add_stmt(&mut self,stmt: Statement){
@@ -85,12 +52,11 @@ impl AbstractSyntaxTree{
 /// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Statement {
-    pub uid: NodeId,
     pub kind: StatementKind,
 }
 impl Statement{
-    pub fn new(uid: NodeId,kind: StatementKind) -> Statement{
-        Statement{uid,kind}
+    pub fn new(kind: StatementKind) -> Statement{
+        Statement{kind}
     }
 }
 
@@ -103,12 +69,11 @@ pub enum StatementKind {
 /// Represents an Expression
 #[derive(PartialEq, PartialOrd,Debug,Clone)]
 pub struct Expression {
-    pub uid: NodeId,
     pub kind: ExpressionKind,
 }
 impl Expression{
-    pub fn new(uid: NodeId,kind: ExpressionKind) -> Expression{
-        Expression{uid,kind}
+    pub fn new(kind: ExpressionKind) -> Expression{
+        Expression{kind}
     }
 }
 
@@ -116,13 +81,12 @@ impl Expression{
 /// Represents an Binding of a value to a symbol (name of a variable)
 #[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq)]
 pub struct VariableBinding {
-    pub uid: NodeId,
     pub data_type: DataType,
     pub symbol: String,
 }
 impl VariableBinding{
-    pub fn new(uid: NodeId,data_type: DataType,symbol: String) -> VariableBinding{
-        VariableBinding{uid,data_type,symbol}
+    pub fn new(data_type: DataType,symbol: String) -> VariableBinding{
+        VariableBinding{data_type,symbol}
     }
 }
 
@@ -195,12 +159,11 @@ pub enum UnOp {
 /// or an function call like fn doSomething(){block}
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Block {
-    pub uid: NodeId,
     pub statements: Vec<Statement>,
 }
 impl Block{
-    pub fn new(uid: NodeId, stmts: Vec<Statement>) -> Block{
-        Block{uid,statements: stmts}
+    pub fn new(stmts: Vec<Statement>) -> Block{
+        Block{statements: stmts}
     }
     pub fn add_stmt(&mut self,stmt: Statement){
         self.statements.push(stmt);

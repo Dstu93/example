@@ -1,5 +1,5 @@
 use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
-use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, NodeId, Block, StatementKind, ExpressionKind};
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, Block, StatementKind, ExpressionKind};
 use crate::frontend::parser::token_pattern::ParseError;
 use crate::frontend::syntax::DataType;
 
@@ -8,7 +8,6 @@ const TOKEN_STACK_SIZE: usize = 3;
 pub struct ASTParser{
     stack: Vec<Token>,
     stream: TokenStream,
-    current_node_id: NodeId,
 }
 
 impl ASTParser {
@@ -17,7 +16,6 @@ impl ASTParser {
         ASTParser {
             stack: Vec::with_capacity(TOKEN_STACK_SIZE),
             stream,
-            current_node_id: 0.into()
         }
     }
 
@@ -89,8 +87,8 @@ impl ASTParser {
         let block = self.parse_block_stmt()?;
         let opt_args = if args.is_empty() { None} else { Some(args) };
         let fn_stmt_kind = ExpressionKind::FnDecl(fn_name,block,opt_args,return_type);
-        let fn_stmt_expr = Expression::new(self.next_nodeid(),fn_stmt_kind);
-        let fn_stmt = Statement::new(self.next_nodeid(), StatementKind::Expression(fn_stmt_expr));
+        let fn_stmt_expr = Expression::new(fn_stmt_kind);
+        let fn_stmt = Statement::new(StatementKind::Expression(fn_stmt_expr));
         Ok(fn_stmt)
     }
 
@@ -119,6 +117,7 @@ impl ASTParser {
     }
 
     fn parse_block_stmt(&mut self) -> Result<Block,ParseError>{
+        let block: Block;
         unimplemented!("parsing block statements is not implemented yet");
     }
 
@@ -141,9 +140,4 @@ impl ASTParser {
         Ok(Option::None)
     }
 
-    fn next_nodeid(&mut self) -> NodeId {
-        let nid = self.current_node_id;
-        self.current_node_id = NodeId::new_next_id(self.current_node_id);
-        nid
-    }
 }
