@@ -112,32 +112,59 @@ impl ASTParser {
     }
 
     fn parse_argument(&mut self) -> Result<VariableBinding,ParseError> {
-        //identifier :
-        unimplemented!("not implemented right now");
+        //identifier : DataType
+        let symbol = match self.lookup_next().kind(){
+            TokenType::Identifier => self.next(),
+            _ => return Err(ParseError::WrongToken(self.next(),vec![TokenType::Identifier]))
+        };
+        let colon = self.next();
+        if colon.kind() != TokenType::SeparatorColon {
+            return Err(ParseError::WrongToken(colon,vec![TokenType::SeparatorColon]));
+        }
+        let datatype = self.parse_datatype()?;
+        Ok(VariableBinding::new(datatype,symbol.move_value()))
     }
 
     fn parse_block_stmt(&mut self) -> Result<Block,ParseError>{
-        let block: Block;
-        unimplemented!("parsing block statements is not implemented yet");
+        let token = self.next();
+        match token.kind() {
+            TokenType::SeparatorCurvedBracketOpen => {},
+            _ => {return Err(ParseError::WrongToken(token,vec![TokenType::SeparatorCurvedBracketOpen]))}
+        }
+        let mut stmts = Vec::with_capacity(20);
+        while self.lookup_next().kind() != TokenType::SeparatorCurvedBracketClosed {
+            let stmt = self.parse_stmt()?;
+            stmts.push(stmt);
+        }
+
+        Ok(Block::new(stmts))
     }
 
     fn parse_return_type(&mut self) -> Result<Option<DataType>,ParseError>{
         if self.lookup_next().kind() == TokenType::SeparatorColon {
-            //Parse
             drop(self.next()); //drop the : because we dont need it
-            let datatype_token = self.next();
-            let datatype = match datatype_token.kind() {
-                TokenType::Boolean => {DataType::Boolean},
-                TokenType::Integer=> {DataType::Integer},
-                TokenType::Float=> {DataType::Float},
-                TokenType::String=> {DataType::String},
-                _ => {return Err(ParseError::WrongToken(datatype_token,vec![TokenType::String,TokenType::Float,TokenType::Boolean]))}
-            };
+            let datatype = self.parse_datatype()?;
             return Ok(Some(datatype));
         } else if self.lookup_next().kind() != TokenType::SeparatorCurvedBracketOpen {
             return Err(ParseError::WrongToken(self.next(),vec![TokenType::SeparatorColon,TokenType::SeparatorCurvedBracketOpen]));
         }
         Ok(Option::None)
+    }
+
+    fn parse_datatype(&mut self) -> Result<DataType,ParseError> {
+        let datatype_token = self.next();
+        let datatype = match datatype_token.kind() {
+            TokenType::Boolean => { DataType::Boolean },
+            TokenType::Integer => { DataType::Integer },
+            TokenType::Float => { DataType::Float },
+            TokenType::String => { DataType::String },
+            _ => { return Err(ParseError::WrongToken(datatype_token, vec![TokenType::String, TokenType::Float,TokenType::Boolean, TokenType::Integer])) }
+        };
+        Ok(datatype)
+    }
+
+    pub fn parse_stmt(&mut self) -> Result<Statement,ParseError>{
+        unimplemented!("statement parsing is not implemented yet");
     }
 
 }
