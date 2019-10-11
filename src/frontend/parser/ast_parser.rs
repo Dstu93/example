@@ -2,11 +2,12 @@ use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, Block, StatementKind, ExpressionKind};
 use crate::frontend::parser::token_pattern::ParseError;
 use crate::frontend::syntax::DataType;
+use std::collections::VecDeque;
 
 const TOKEN_STACK_SIZE: usize = 3;
 
 pub struct ASTParser{
-    stack: Vec<Token>,
+    qeue: VecDeque<Token>,
     stream: TokenStream,
 }
 
@@ -14,7 +15,7 @@ impl ASTParser {
 
     pub fn new(stream: TokenStream) -> Self {
         ASTParser {
-            stack: Vec::with_capacity(TOKEN_STACK_SIZE),
+            qeue: VecDeque::with_capacity(TOKEN_STACK_SIZE),
             stream,
         }
     }
@@ -40,7 +41,7 @@ impl ASTParser {
         for _ in 0..TOKEN_STACK_SIZE {
             match self.stream.next() {
                 None => {break;},
-                Some(t) => { self.stack.push(t); },
+                Some(t) => { self.qeue.push_back(t); },
             };
         }
     }
@@ -50,17 +51,17 @@ impl ASTParser {
         match self.stream.next() {
             None => {},
             Some(token) => {
-                self.stack.push(token);
+                self.qeue.push_back(token);
             },
         };
 
-        self.stack.pop().expect("called next after EOF")
+        self.qeue.pop_front().expect("called next after EOF")
     }
 
     /// lookahead for the next token on the stack.
     /// panics if look after EOF
     fn lookup_next(&mut self) -> &Token {
-        self.stack.last().expect("called lookup_next after EOF")
+        self.qeue.front().expect("called lookup_next after EOF")
     }
 
     /// parses a single function to an Statement
@@ -81,10 +82,6 @@ impl ASTParser {
         }
         let args = self.parse_arg_list()?;
 
-        if self.lookup_next().kind() != TokenType::SeparatorCurvedBracketOpen {
-            return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorCurvedBracketOpen]));
-        }
-
         let return_type = self.parse_return_type()?;
 
         //parsing the function body
@@ -98,15 +95,21 @@ impl ASTParser {
 
     /// reads from the Tokenstream to read the argument list from a function signature
     fn parse_arg_list(&mut self) -> Result<Vec<VariableBinding>,ParseError>{
+        let next = self.next();
+        if next.kind() != TokenType::SeparatorBracketOpen {
+            return Err(ParseError::WrongToken(next,vec![TokenType::SeparatorBracketOpen]))
+        }
         let mut args = Vec::new();
         while self.lookup_next().kind() != TokenType::SeparatorBracketClose {
             let arg = self.parse_argument()?;
             args.push(arg);
             let next = self.lookup_next().kind();
-            if next != TokenType::SeparatorSemiColon || next != TokenType::SeparatorBracketClose {
-                return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorSemiColon]));
+            if next != TokenType::SeparatorComma || next != TokenType::SeparatorBracketClose {
+                return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorComma,TokenType::SeparatorBracketClose]));
             }
+            drop(self.next()); // consume the ','
         }
+        drop(self.next()); // consume the ')'
         Ok(args)
     }
 
