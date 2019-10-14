@@ -193,22 +193,56 @@ impl ASTParser {
         // loop
 
         let next_token = self.lookup_next().kind();
-        match next_token {
-            TokenType::Let => {
-                //TODO parse Declaration
-            },
-            TokenType::For => {},
-            TokenType::Loop => {},
-            TokenType::Break => {},
-            TokenType::Continue => {},
-            TokenType::Return => {},
-            TokenType::While => {},
-            TokenType::If => {},
-            TokenType::Identifier => {},
-            _=> { } //TODO expected statement, found wrong token
-        }
+        let stmt = match next_token {
+            TokenType::Let => {self.parse_let_stmt()? },
+            TokenType::For => {unimplemented!("For keyword is not supported yet")}, //TODO for loop does not exists at the moment
+            TokenType::Loop => {self.parse_loop()?},
+            TokenType::Break => {self.parse_break_stmt()?},
+            TokenType::Continue => {self.parse_continue_stmt()?},
+            TokenType::Return => {self.parse_return_stmt()?},
+            TokenType::While => {self.parse_while_stmt()?},
+            TokenType::If => { self.parse_if()? },
+            //TokenType::Identifier => {}, //FIXME parsing, resigning of variable or function call
+            _ => {return Err(ParseError::WrongToken(self.next(),vec![
+                TokenType::If,
+                TokenType::For,
+                TokenType::Let,
+                TokenType::Loop,
+                TokenType::Break,
+                TokenType::Return,
+                TokenType::While
+            ]))}
+        };
 
-        unimplemented!("statement parsing is not implemented yet");
+        Ok(stmt)
+    }
+
+    fn parse_if(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing if statement is not implemented yet");
+    }
+
+    fn parse_let_stmt(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing declaration is not possible now");
+    }
+
+    fn parse_loop(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing loop statements is not implemented yet");
+    }
+
+    fn parse_break_stmt(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing break statement is not implemented");
+    }
+
+    fn parse_continue_stmt(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing continue stmt is not implemented");
+    }
+
+    fn parse_while_stmt(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing while stmt is not implemented");
+    }
+
+    fn parse_return_stmt(&mut self) -> Result<Statement,ParseError> {
+        unimplemented!("parsing return stmt is not implemented");
     }
 
 }
