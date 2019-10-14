@@ -181,7 +181,33 @@ impl ASTParser {
         Ok(datatype)
     }
 
-    fn parse_stmt(&mut self) -> Result<Statement,ParseError>{
+    fn parse_stmt(&mut self) -> Result<Statement,ParseError> {
+        //possible statements
+        // fnCall identifer.identifier ( expression )
+        // if
+        // let declaration
+        // break
+        // continue
+        // return
+        // while
+        // loop
+
+        let next_token = self.lookup_next().kind();
+        match next_token {
+            TokenType::Let => {
+                //TODO parse Declaration
+            },
+            TokenType::For => {},
+            TokenType::Loop => {},
+            TokenType::Break => {},
+            TokenType::Continue => {},
+            TokenType::Return => {},
+            TokenType::While => {},
+            TokenType::If => {},
+            TokenType::Identifier => {},
+            _=> { } //TODO expected statement, found wrong token
+        }
+
         unimplemented!("statement parsing is not implemented yet");
     }
 
