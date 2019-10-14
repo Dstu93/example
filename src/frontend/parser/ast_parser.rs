@@ -104,13 +104,24 @@ impl ASTParser {
             let arg = self.parse_argument()?;
             args.push(arg);
             let next = self.lookup_next().kind();
-            if next != TokenType::SeparatorComma || next != TokenType::SeparatorBracketClose {
+            if next == TokenType::SeparatorComma {
+                //consume , and parse next Argument
+                self.consume_next_token();
+                continue;
+            } else if next == TokenType::SeparatorBracketClose {
+                //consume next the brackets and break from the loop to stop parsing arguments
+                self.consume_next_token();
+                break;
+            } else  {
                 return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorComma,TokenType::SeparatorBracketClose]));
             }
-            drop(self.next()); // consume the ','
         }
-        drop(self.next()); // consume the ')'
         Ok(args)
+    }
+
+    /// consume the next token from the tokenstream and drop it
+    fn consume_next_token(&mut self) {
+        drop(self.next());
     }
 
     /// Parse the next Expression from the TokenStream
@@ -149,7 +160,7 @@ impl ASTParser {
 
     fn parse_return_type(&mut self) -> Result<Option<DataType>,ParseError>{
         if self.lookup_next().kind() == TokenType::SeparatorColon {
-            drop(self.next()); //drop the : because we dont need it
+            self.consume_next_token(); //drop the : because we dont need it
             let datatype = self.parse_datatype()?;
             return Ok(Some(datatype));
         } else if self.lookup_next().kind() != TokenType::SeparatorCurvedBracketOpen {
