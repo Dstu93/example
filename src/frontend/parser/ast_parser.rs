@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 const TOKEN_STACK_SIZE: usize = 3;
 
 pub struct ASTParser{
-    qeue: VecDeque<Token>,
+    queue: VecDeque<Token>,
     stream: TokenStream,
 }
 
@@ -15,7 +15,7 @@ impl ASTParser {
 
     pub fn new(stream: TokenStream) -> Self {
         ASTParser {
-            qeue: VecDeque::with_capacity(TOKEN_STACK_SIZE),
+            queue: VecDeque::with_capacity(TOKEN_STACK_SIZE),
             stream,
         }
     }
@@ -41,7 +41,7 @@ impl ASTParser {
         for _ in 0..TOKEN_STACK_SIZE {
             match self.stream.next() {
                 None => {break;},
-                Some(t) => { self.qeue.push_back(t); },
+                Some(t) => { self.queue.push_back(t); },
             };
         }
     }
@@ -51,17 +51,17 @@ impl ASTParser {
         match self.stream.next() {
             None => {},
             Some(token) => {
-                self.qeue.push_back(token);
+                self.queue.push_back(token);
             },
         };
 
-        self.qeue.pop_front().expect("called next after EOF")
+        self.queue.pop_front().expect("called next after EOF")
     }
 
     /// lookahead for the next token on the stack.
     /// panics if look after EOF
     fn lookup_next(&mut self) -> &Token {
-        self.qeue.front().expect("called lookup_next after EOF")
+        self.queue.front().expect("called lookup_next after EOF")
     }
 
     /// parses a single function to an Statement
