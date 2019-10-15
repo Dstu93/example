@@ -66,17 +66,6 @@ pub enum StatementKind {
     Expression(Expression),
 }
 
-/// Represents an Expression
-#[derive(PartialEq, PartialOrd,Debug,Clone)]
-pub struct Expression {
-    pub kind: ExpressionKind,
-}
-impl Expression{
-    pub fn new(kind: ExpressionKind) -> Expression{
-        Expression{kind}
-    }
-}
-
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
 #[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq)]
@@ -92,7 +81,7 @@ impl VariableBinding{
 
 /// Enum of all Expressions
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum ExpressionKind {
+pub enum Expression {
     /// call of an std function or a user created function,
     /// String represents the function name
     FnCall(String,Option<Vec<Argument>>),

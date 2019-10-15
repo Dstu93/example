@@ -1,5 +1,5 @@
 use crate::frontend::syntax::token::{TokenType, TokenStream, Token};
-use crate::frontend::syntax::ast::ExpressionKind;
+use crate::frontend::syntax::ast::Expression;
 
 /// Small parser template which matches an pattern of Tokens
 /// and parse them to a expression
@@ -14,7 +14,7 @@ pub trait TokenPatternParser{
     /// reads from the tokenstream and parse the tokens to an ExpressionKind.
     /// returns parseError if cant parse correctly. Check with matches() if this
     /// token stream could be parsed
-    fn parse_to_expression(&mut self, ts: TokenStream) -> Result<ExpressionKind,ParseError>;
+    fn parse_to_expression(&mut self, ts: TokenStream) -> Result<Expression,ParseError>;
 }
 
 
