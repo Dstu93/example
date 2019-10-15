@@ -1,8 +1,9 @@
 use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
-use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, Block, StatementKind, ExpressionKind};
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, Block, StatementKind};
 use crate::frontend::parser::token_pattern::ParseError;
 use crate::frontend::syntax::DataType;
 use std::collections::VecDeque;
+use crate::frontend::syntax::ast::StatementKind::Declaration;
 
 const TOKEN_STACK_SIZE: usize = 3;
 
@@ -87,8 +88,7 @@ impl ASTParser {
         //parsing the function body
         let block = self.parse_block_stmt()?;
         let opt_args = if args.is_empty() { None} else { Some(args) };
-        let fn_stmt_kind = ExpressionKind::FnDecl(fn_name,block,opt_args,return_type);
-        let fn_stmt_expr = Expression::new(fn_stmt_kind);
+        let fn_stmt_expr = Expression::FnDecl(fn_name, block, opt_args, return_type);
         let fn_stmt = Statement::new(StatementKind::Expression(fn_stmt_expr));
         Ok(fn_stmt)
     }
@@ -124,9 +124,25 @@ impl ASTParser {
         drop(self.next());
     }
 
+    /// look up the next token and check if it is of expected type.
+    /// returns a ParseError::WrongToken if the types dont match
+    fn expect_nxt(&mut self, expect: TokenType) -> Result<(),ParseError> {
+        if self.lookup_next().kind() != expect {
+            return Err(ParseError::WrongToken(self.next(),vec![expect]));
+        }
+        Ok(())
+    }
+
+    /// Validates the next Token and consumes it if tokentype matches
+    fn expect_nxt_and_consume(&mut self, expect: TokenType) -> Result<(),ParseError> {
+        self.expect_nxt(expect)?;
+        self.consume_next_token();
+        Ok(())
+    }
+
     /// Parse the next Expression from the TokenStream
     fn parse_expression(&mut self) -> Result<Expression,ParseError> {
-        unimplemented!("not implemented right now!");
+        unimplemented!("expression parsing is not implemented right now!");
     }
 
     fn parse_argument(&mut self) -> Result<VariableBinding,ParseError> {
@@ -218,23 +234,57 @@ impl ASTParser {
     }
 
     fn parse_if(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing if statement is not implemented yet");
+        self.expect_nxt_and_consume(TokenType::If)?;
+        //Condition must be closed with (condition) like if( a == 1 ){doSomething();}
+        self.expect_nxt(TokenType::SeparatorBracketOpen)?;
+        let condition_expr = Box::new(self.parse_group_expr()?);
+        self.expect_nxt(TokenType::SeparatorCurvedBracketOpen)?;
+        let if_block = self.parse_block_stmt()?;
+        let else_block = match self.lookup_next().kind() {
+            TokenType::Else => {
+                //consume the Else Token and parse the else block
+                self.consume_next_token();
+                Some(self.parse_block_stmt()?)
+            }
+            _ => {None}
+        };
+        let if_expr = Expression::If(condition_expr, if_block, else_block);
+        let if_stmt = Statement::new(StatementKind::Expression(if_expr));
+        Ok(if_stmt)
     }
 
     fn parse_let_stmt(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing declaration is not possible now");
+        self.expect_nxt_and_consume(TokenType::Let)?;
+        self.expect_nxt(TokenType::Identifier)?;
+        let variable_name = self.next().move_value();
+        self.expect_nxt_and_consume(TokenType::SeparatorColon)?;
+        let variable_type = self.parse_datatype()?;
+        self.expect_nxt_and_consume(TokenType::Assign)?;
+        let expr = self.parse_expression()?;
+        let binding = VariableBinding::new(variable_type,variable_name);
+        Ok(Statement::new(StatementKind::Declaration(binding,expr)))
     }
 
     fn parse_loop(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing loop statements is not implemented yet");
+        self.expect_nxt(TokenType::Loop)?;
+        self.consume_next_token(); //consume the loop token
+        self.expect_nxt(TokenType::SeparatorCurvedBracketOpen)?;
+        let loop_block = self.parse_block_stmt()?;
+        let loop_expr = Expression::Loop(loop_block);
+        Ok(Statement::new(StatementKind::Expression(loop_expr)))
     }
 
     fn parse_break_stmt(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing break statement is not implemented");
+        self.expect_nxt(TokenType::Break)?;
+        self.consume_next_token();
+        let break_stmt = Statement::new(StatementKind::Expression(Expression::Break));
+        Ok(break_stmt)
     }
 
     fn parse_continue_stmt(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing continue stmt is not implemented");
+        self.expect_nxt(TokenType::Continue)?;
+        self.consume_next_token();
+        Ok(Statement::new(StatementKind::Expression(Expression::Continue)))
     }
 
     fn parse_while_stmt(&mut self) -> Result<Statement,ParseError> {
@@ -242,7 +292,22 @@ impl ASTParser {
     }
 
     fn parse_return_stmt(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing return stmt is not implemented");
+        self.expect_nxt(TokenType::Return)?;
+        self.consume_next_token();
+        let expr = match self.lookup_next().kind() {
+            TokenType::SeparatorSemiColon => {
+                self.consume_next_token();
+                None
+            }
+            _ => {Some(Box::new(self.parse_expression()?))}
+        };
+        let return_expr = Expression::Return(expr);
+        let return_stmt = Statement::new(StatementKind::Expression(return_expr));
+        Ok(return_stmt)
+    }
+
+    fn parse_group_expr(&mut self) -> Result<Expression,ParseError> {
+        unimplemented!("parsing grouped expressions is not implemented");
     }
 
 }
