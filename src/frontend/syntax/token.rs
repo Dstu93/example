@@ -19,6 +19,8 @@ pub enum TokenType {
     Integer,
     Float,
     String,
+    And,
+    Or,
     BooleanTrue,
     BooleanFalse,
     Identifier,

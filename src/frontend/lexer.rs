@@ -236,6 +236,8 @@ fn match_keyword(value: &str) -> TokenType{
         "int" => TokenType::Integer,
         "float" => TokenType::Float,
         "string" => TokenType::String,
+        "and" => TokenType::And,
+        "or" => TokenType::Or,
         _ => TokenType::Identifier
     }
 }

@@ -135,6 +135,8 @@ pub enum BinOp {
     Lt,
     /// Less Then Equal Operator "a <= b"
     Le,
+    And,
+    Or,
 }
 
 /// Enum of unary operators
