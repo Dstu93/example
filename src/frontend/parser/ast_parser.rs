@@ -1,9 +1,9 @@
-use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
-use crate::frontend::syntax::ast::{AbstractSyntaxTree, Expression, VariableBinding, Statement, Block, StatementKind};
-use crate::frontend::parser::token_pattern::ParseError;
-use crate::frontend::syntax::DataType;
 use std::collections::VecDeque;
-use crate::frontend::syntax::ast::StatementKind::Declaration;
+
+use crate::frontend::parser::token_pattern::ParseError;
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, StatementKind, VariableBinding, BinOp, UnOp};
+use crate::frontend::syntax::DataType;
+use crate::frontend::syntax::token::{Token, TokenStream, TokenType};
 
 const TOKEN_STACK_SIZE: usize = 3;
 
@@ -65,6 +65,10 @@ impl ASTParser {
         self.queue.front().expect("called lookup_next after EOF")
     }
 
+    fn match_next(&mut self,token_kind: TokenType) -> bool {
+        self.lookup_next().kind() == token_kind
+    }
+
     /// parses a single function to an Statement
     fn parse_fn(&mut self) -> Result<Statement,ParseError> {
         let token = self.next();
@@ -104,18 +108,17 @@ impl ASTParser {
             let arg = self.parse_argument()?;
             args.push(arg);
             let next = self.lookup_next().kind();
-            if next == TokenType::SeparatorComma {
-                //consume , and parse next Argument
-                self.consume_next_token();
-                continue;
-            } else if next == TokenType::SeparatorBracketClose {
-                //consume next the brackets and break from the loop to stop parsing arguments
-                self.consume_next_token();
-                break;
-            } else  {
-                return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorComma,TokenType::SeparatorBracketClose]));
-            }
+            match next {
+                TokenType::SeparatorComma => {
+                    //consume , and parse next Argument
+                    self.consume_next_token();
+                    continue;
+                },
+                TokenType::SeparatorBracketClose => {break;}
+                _=> {return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorComma,TokenType::SeparatorBracketClose]));}
+            };
         }
+        self.expect_nxt_and_consume(TokenType::SeparatorCurvedBracketClosed)?;
         Ok(args)
     }
 
@@ -142,7 +145,125 @@ impl ASTParser {
 
     /// Parse the next Expression from the TokenStream
     fn parse_expression(&mut self) -> Result<Expression,ParseError> {
-        unimplemented!("expression parsing is not implemented right now!");
+        self.assignment()
+    }
+
+    fn assignment(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.or()?;
+        if self.match_next(TokenType::Assign) {
+            self.consume_next_token(); //Consume the Assigment
+            let value_expr = self.assignment()?;
+            if let Expression::Symbol(var) = expr {
+                return Ok(Expression::Assignment(var, Box::from(value_expr)));
+            }else {
+                return Err(ParseError::GrammarMistake("Expected symbol left on the assignment"));
+            }
+        }
+        Ok(expr)
+    }
+
+    fn or(&mut self) -> Result<Expression,ParseError>{
+        let expr = self.and()?;
+        if self.match_next(TokenType::Or) {
+            self.consume_next_token();
+            let right_expr = self.and()?;
+            let or = Expression::BinaryOp(Box::from(expr),BinOp::Or, Box::from(right_expr));
+            return Ok(or);
+        }
+        Ok(expr)
+    }
+
+    fn and(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.equality()?;
+        if self.match_next(TokenType::And) {
+            self.consume_next_token();
+            let right_expr = self.equality()?;
+            let and_expr = Expression::BinaryOp( Box::from(expr),BinOp::And, Box::from(right_expr));
+            return Ok(and_expr);
+        }
+        Ok(expr)
+    }
+
+    fn equality(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.comparison()?;
+        let not_equal = self.match_next(TokenType::OperatorNotEqual);
+        let equal = self.match_next(TokenType::OperatorEqual);
+        if not_equal || equal {
+            self.consume_next_token();
+            let op = if equal { BinOp::Eq } else { BinOp::Neq };
+            let right = self.comparison()?;
+            return Ok(Expression::BinaryOp(Box::from(expr),op, Box::from(right)));
+        }
+        Ok(expr)
+    }
+
+    fn comparison(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.addition()?;
+
+        let greater = self.match_next(TokenType::OperatorGreaterThen);
+        let greater_equal = self.match_next(TokenType::OperatorGreaterOrEqual);
+        let less = self.match_next(TokenType::OperatorLessThen);
+        let less_equal = self.match_next(TokenType::OperatorLessOrEqual);
+
+        if greater {
+            return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Gt, Box::from(self.addition()?)))
+        } else if greater_equal {
+            return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Ge, Box::from(self.addition()?)))
+        } else if less {
+            return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Lt, Box::from(self.addition()?)))
+        } else if less_equal {
+            return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Le, Box::from(self.addition()?)))
+        }
+
+        Ok(expr)
+    }
+
+    fn addition(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.multiplication()?;
+        let addition = self.match_next(TokenType::OperatorPlus);
+        let subtraction = self.match_next(TokenType::OperatorMinus);
+        if addition || subtraction {
+            self.consume_next_token();
+            let op = if addition { BinOp::Plus } else { BinOp::Minus };
+            let right = self.multiplication()?;
+            return Ok(Expression::BinaryOp(Box::from(expr),op, Box::from(right)));
+        }
+        Ok(expr)
+    }
+
+    fn multiplication(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.unary()?;
+        let multiplication = self.match_next(TokenType::OperatorMultiplication);
+        let divide = self.match_next(TokenType::OperatorDivide);
+        if multiplication || divide {
+            self.consume_next_token();
+            let op = if multiplication {BinOp::Multi}else{BinOp::Divide};
+            let right = self.unary()?;
+            return Ok(Expression::BinaryOp(Box::from(expr), op, Box::from(right)));
+        }
+        Ok(expr)
+    }
+
+    fn unary(&mut self) -> Result<Expression,ParseError> {
+        let is_negation = self.match_next(TokenType::OperatorNegation);
+        let is_negative = self.match_next(TokenType::OperatorMinus);
+        if is_negation || is_negative {
+            self.consume_next_token();
+            let op = if is_negation {UnOp::Negation } else { UnOp::Minus };
+            let right = self.unary()?;
+            return Ok(Expression::UnaryOp(op, Box::from(right)));
+        }
+        self.call()
+    }
+
+    fn call(&mut self) -> Result<Expression,ParseError> {
+        let expr = self.atom()?;
+        //TODO parse Function call
+        Ok(expr)
+    }
+
+    fn atom(&mut self) -> Result<Expression,ParseError> {
+        //TODO
     }
 
     fn parse_argument(&mut self) -> Result<VariableBinding,ParseError> {
@@ -179,6 +300,7 @@ impl ASTParser {
             self.consume_next_token(); //drop the : because we dont need it
             let datatype = self.parse_datatype()?;
             return Ok(Some(datatype));
+            //if we dont find a return type it must follow the function body/ block main(){}
         } else if self.lookup_next().kind() != TokenType::SeparatorCurvedBracketOpen {
             return Err(ParseError::WrongToken(self.next(),vec![TokenType::SeparatorColon,TokenType::SeparatorCurvedBracketOpen]));
         }
@@ -275,15 +397,13 @@ impl ASTParser {
     }
 
     fn parse_break_stmt(&mut self) -> Result<Statement,ParseError> {
-        self.expect_nxt(TokenType::Break)?;
-        self.consume_next_token();
+        self.expect_nxt_and_consume(TokenType::Break)?;
         let break_stmt = Statement::new(StatementKind::Expression(Expression::Break));
         Ok(break_stmt)
     }
 
     fn parse_continue_stmt(&mut self) -> Result<Statement,ParseError> {
-        self.expect_nxt(TokenType::Continue)?;
-        self.consume_next_token();
+        self.expect_nxt_and_consume(TokenType::Continue)?;
         Ok(Statement::new(StatementKind::Expression(Expression::Continue)))
     }
 

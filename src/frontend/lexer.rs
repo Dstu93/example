@@ -1,7 +1,7 @@
 use std::str::Chars;
 use std::iter::Peekable;
 use std::sync::mpsc::{channel, Sender, SendError};
-use std::thread::{spawn,JoinHandle};
+use std::thread::{JoinHandle};
 use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
 
 /// Lexer for splitting the source code into a vec of tokens
@@ -55,7 +55,11 @@ impl Lexer {
                     let mut equal = c.to_string();
                     equal.push(iter.next().unwrap());
                     Token::new(TokenType::OperatorEqual,equal,0)
-                } else {
+                } else if c == '!' && iter.peek().eq(&Some(&'=')) {
+                    let mut  not_equal = c.to_string();
+                    not_equal.push(iter.next().unwrap());
+                    Token::new(TokenType::OperatorNotEqual,not_equal,0)
+                }else {
                     let kind = operator_to_token_type(&c);
                     Token::new(kind,c.to_string(),0)
                 };

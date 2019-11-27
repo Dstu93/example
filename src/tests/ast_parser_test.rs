@@ -80,7 +80,7 @@ fn function_with_arguments() {
     let return_statement = Statement::new(StatementKind::Expression(return_expression));
     let y = Expression::Symbol("y".into());
     let x = Expression::Symbol("x".into());
-    let multiplication = Expression::BinaryOp(BinOp::Multi, Box::new(x), Box::new(y));
+    let multiplication = Expression::BinaryOp(Box::new(x), BinOp::Multi, Box::new(y));
     let solution_binding = VariableBinding::new(DataType::Integer,"solution".into());
     let assignment = Statement::new(StatementKind::Declaration(solution_binding,multiplication));
 

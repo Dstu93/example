@@ -25,6 +25,8 @@ pub enum ParseError{
     NaN(Token),
     /// Found, Expected
     WrongToken(Token,Vec<TokenType>),
+    /// Language Mistake with description
+    GrammarMistake(&'static str),
     /// This Token is not allowed outside of a function
     OutOfFnScope(Token),
     Missing(TokenType),

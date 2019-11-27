@@ -1,4 +1,3 @@
-use std::convert::From;
 
 use crate::frontend::syntax::{DataType, DataValue};
 
@@ -91,12 +90,14 @@ pub enum Expression {
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="
-    BinaryOp(BinOp,Box<Expression>,Box<Expression>),
+    BinaryOp(Box<Expression>,BinOp,Box<Expression>),
     /// If statement with an optional else block.
     /// if "expression " {block} else {block}
     If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     /// single variable like "counter"
     Symbol(String),
+    /// Assinment of a symbol/variable
+    Assignment(String,Box<Expression>),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
     /// Break of an loop
@@ -144,6 +145,7 @@ pub enum BinOp {
 pub enum UnOp {
     /// ! Operator for inverting an single Expression
     Negation,
+    Minus,
 }
 
 /// represents an block of statements like if {block} else {block}
