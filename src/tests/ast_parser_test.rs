@@ -27,8 +27,8 @@ fn fun_main_function(){
     let a = Expression::Symbol("a".into());
     let if_condition = Expression::UnaryOp(UnOp::Negation, Box::new(a));
     let message = Expression::Literal(DataValue::String("a is false".into()));
-    let args = vec![Argument::new(DataType::String,message)];
-    let print_call = Expression::FnCall("print".into(), Some(args));
+    let args = vec![message];
+    let print_call = Expression::FnCall("print".into(), args);
     let print_stmt = Statement::new(StatementKind::Expression(print_call));
     let block = Block::new(vec![print_stmt]);
     let if_stmt_kind = StatementKind::Expression(Expression::If(Box::new(if_condition), block, None));

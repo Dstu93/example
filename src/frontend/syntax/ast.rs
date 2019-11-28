@@ -83,7 +83,7 @@ impl VariableBinding{
 pub enum Expression {
     /// call of an std function or a user created function,
     /// String represents the function name
-    FnCall(String,Option<Vec<Argument>>),
+    FnCall(String,Vec<Expression>),
     /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
     /// and an Option of an Returned DataType
     FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
@@ -160,19 +160,5 @@ impl Block{
     }
     pub fn add_stmt(&mut self,stmt: Statement){
         self.statements.push(stmt);
-    }
-}
-
-/// Represents a function argument.
-/// An argument consists of an data Type and the concrete value
-#[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Argument {
-    pub data_type: DataType,
-    pub value: Expression,
-}
-
-impl Argument{
-    pub fn new(dtype: DataType,value: Expression) -> Argument{
-        Argument{data_type: dtype,value}
     }
 }

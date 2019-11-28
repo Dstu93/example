@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::frontend::parser::token_pattern::ParseError;
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, StatementKind, VariableBinding, BinOp, UnOp};
-use crate::frontend::syntax::DataType;
+use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::token::{Token, TokenStream, TokenType};
 
 const TOKEN_STACK_SIZE: usize = 3;
@@ -257,13 +257,41 @@ impl ASTParser {
     }
 
     fn call(&mut self) -> Result<Expression,ParseError> {
+        //if '(' comes after this token this value string is needed as function name
         let expr = self.atom()?;
-        //TODO parse Function call
+
+        if self.match_next(TokenType::SeparatorBracketOpen) {
+            self.consume_next_token(); //Consume the opening (
+            let name = match expr {
+              Expression::Symbol(name) => name,
+                _ => return Err(ParseError::GrammarMistake("invalid function Name"))
+            };
+            let mut arguments = Vec::new();
+            while !self.match_next(TokenType::SeparatorBracketClose){
+                let expr = self.parse_expression()?;
+                arguments.push(expr);
+                if self.match_next(TokenType::SeparatorComma) {
+                    self.consume_next_token();
+                    continue;
+                }
+            }
+            return Ok(Expression::FnCall(name, arguments));
+        }
+
         Ok(expr)
     }
 
     fn atom(&mut self) -> Result<Expression,ParseError> {
-        //TODO
+        let token = self.next();
+        match token.kind() {
+            TokenType::BooleanTrue => Ok(Expression::Literal(DataValue::Boolean(true))),
+            TokenType::BooleanFalse => Ok(Expression::Literal(DataValue::Boolean(false))),
+            TokenType::Identifier => Ok(Expression::Symbol(self.next().move_value())),
+            TokenType::LiteralInteger => Ok(Expression::Literal(DataValue::Integer(token.move_value()))),
+            TokenType::LiteralFloat => Ok(Expression::Literal(DataValue::Float(token.move_value()))),
+            TokenType::LiteralString => Ok(Expression::Literal(DataValue::String(token.move_value()))),
+            _ => Err(ParseError::GrammarMistake("Expected literal or identifier"))
+        }
     }
 
     fn parse_argument(&mut self) -> Result<VariableBinding,ParseError> {
