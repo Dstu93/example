@@ -469,8 +469,4 @@ impl ASTParser {
         Ok(return_stmt)
     }
 
-    fn parse_group_expr(&mut self) -> Result<Expression,ParseError> {
-        unimplemented!("parsing grouped expressions is not implemented");
-    }
-
 }
