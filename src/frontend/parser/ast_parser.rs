@@ -118,7 +118,7 @@ impl ASTParser {
                 _=> {return Err(ParseError::WrongToken(self.next(), vec![TokenType::SeparatorComma,TokenType::SeparatorBracketClose]));}
             };
         }
-        self.expect_nxt_and_consume(TokenType::SeparatorCurvedBracketClosed)?;
+        self.expect_nxt_and_consume(TokenType::SeparatorBracketClose)?;
         Ok(args)
     }
 
@@ -275,6 +275,8 @@ impl ASTParser {
                     continue;
                 }
             }
+            //consume the closing of the function call
+            self.expect_nxt_and_consume(TokenType::SeparatorBracketClose)?;
             return Ok(Expression::FnCall(name, arguments));
         }
 
@@ -286,10 +288,15 @@ impl ASTParser {
         match token.kind() {
             TokenType::BooleanTrue => Ok(Expression::Literal(DataValue::Boolean(true))),
             TokenType::BooleanFalse => Ok(Expression::Literal(DataValue::Boolean(false))),
-            TokenType::Identifier => Ok(Expression::Symbol(self.next().move_value())),
+            TokenType::Identifier => Ok(Expression::Symbol(token.move_value())),
             TokenType::LiteralInteger => Ok(Expression::Literal(DataValue::Integer(token.move_value()))),
             TokenType::LiteralFloat => Ok(Expression::Literal(DataValue::Float(token.move_value()))),
             TokenType::LiteralString => Ok(Expression::Literal(DataValue::String(token.move_value()))),
+            TokenType::SeparatorBracketOpen => {
+                let expr = self.parse_expression()?;
+                self.expect_nxt_and_consume(TokenType::SeparatorBracketClose)?;
+                Ok(expr)
+            },
             _ => Err(ParseError::GrammarMistake("Expected literal or identifier"))
         }
     }
@@ -319,7 +326,7 @@ impl ASTParser {
             let stmt = self.parse_stmt()?;
             stmts.push(stmt);
         }
-
+        self.expect_nxt_and_consume(TokenType::SeparatorCurvedBracketClosed)?;
         Ok(Block::new(stmts))
     }
 
@@ -368,7 +375,7 @@ impl ASTParser {
             TokenType::Return => {self.parse_return_stmt()?},
             TokenType::While => {self.parse_while_stmt()?},
             TokenType::If => { self.parse_if()? },
-            //TokenType::Identifier => {}, //FIXME parsing, resigning of variable or function call
+            TokenType::Identifier => {self.parse_expression_stmt()?},
             _ => {return Err(ParseError::WrongToken(self.next(),vec![
                 TokenType::If,
                 TokenType::For,
@@ -383,11 +390,15 @@ impl ASTParser {
         Ok(stmt)
     }
 
+    fn parse_expression_stmt(&mut self) -> Result<Statement,ParseError> {
+        let expr = self.parse_expression()?;
+        self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
+        Ok(Statement::new(StatementKind::Expression(expr)))
+    }
+
     fn parse_if(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::If)?;
-        //Condition must be closed with (condition) like if( a == 1 ){doSomething();}
-        self.expect_nxt(TokenType::SeparatorBracketOpen)?;
-        let condition_expr = Box::new(self.parse_group_expr()?);
+        let condition_expr = Box::new(self.parse_expression()?);
         self.expect_nxt(TokenType::SeparatorCurvedBracketOpen)?;
         let if_block = self.parse_block_stmt()?;
         let else_block = match self.lookup_next().kind() {
@@ -412,6 +423,7 @@ impl ASTParser {
         self.expect_nxt_and_consume(TokenType::Assign)?;
         let expr = self.parse_expression()?;
         let binding = VariableBinding::new(variable_type,variable_name);
+        self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(Statement::new(StatementKind::Declaration(binding,expr)))
     }
 
@@ -427,11 +439,13 @@ impl ASTParser {
     fn parse_break_stmt(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::Break)?;
         let break_stmt = Statement::new(StatementKind::Expression(Expression::Break));
+        self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(break_stmt)
     }
 
     fn parse_continue_stmt(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::Continue)?;
+        self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(Statement::new(StatementKind::Expression(Expression::Continue)))
     }
 
@@ -451,6 +465,7 @@ impl ASTParser {
         };
         let return_expr = Expression::Return(expr);
         let return_stmt = Statement::new(StatementKind::Expression(return_expr));
+        self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(return_stmt)
     }
 
