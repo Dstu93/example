@@ -1,8 +1,8 @@
 use std::str::Chars;
 use std::iter::Peekable;
-use std::sync::mpsc::{channel,Receiver,Sender};
-use std::thread::{spawn,JoinHandle};
-use frontend::syntax::{DataValue,DataType,token::*};
+use std::sync::mpsc::{channel, Sender, SendError};
+use std::thread::{JoinHandle};
+use crate::frontend::syntax::token::{TokenStream, Token, TokenType};
 
 /// Lexer for splitting the source code into a vec of tokens
 pub struct Lexer;
@@ -18,9 +18,13 @@ impl Lexer {
     pub fn tokenize(src: String) -> (TokenStream,JoinHandle<Result<(),LexerError>>) {
         let (tx,rx) = channel();
 
-        let handle = spawn(move || {
-           Lexer::tokenize_inner(src,tx)
-        });
+        let handle = std::thread::Builder::new()
+            .name("lexer_thread".into())
+            .spawn(move || Lexer::tokenize_inner(src,tx))
+            .expect("could not spawn lexer thread");
+        //let handle = spawn(move || {
+        //   Lexer::tokenize_inner(src,tx)
+        //});
 
         (TokenStream::new(rx),handle)
     }
@@ -43,7 +47,7 @@ impl Lexer {
             }
             if is_separator(&c) {
                 let ttype = separator_to_token_type(&c);
-                tx.send(Token::new(ttype,c.to_string(),0));
+                tx.send(Token::new(ttype,c.to_string(),0))?;
                 continue;
             }
             if is_operator(&c) {
@@ -51,17 +55,21 @@ impl Lexer {
                     let mut equal = c.to_string();
                     equal.push(iter.next().unwrap());
                     Token::new(TokenType::OperatorEqual,equal,0)
-                } else {
+                } else if c == '!' && iter.peek().eq(&Some(&'=')) {
+                    let mut  not_equal = c.to_string();
+                    not_equal.push(iter.next().unwrap());
+                    Token::new(TokenType::OperatorNotEqual,not_equal,0)
+                }else {
                     let kind = operator_to_token_type(&c);
                     Token::new(kind,c.to_string(),0)
                 };
-                tx.send(token);
+                tx.send(token)?;
                 continue;
             }
             if c == '"' {
                 let result = Lexer::read_string(&mut iter);
                 if result.is_ok(){
-                    tx.send(result.unwrap());
+                    tx.send(result.unwrap())?;
                 }
                 else { return Err(result.unwrap_err()) }
                 continue;
@@ -82,10 +90,10 @@ impl Lexer {
                 }
                 if s.contains("."){
                     let token = Token::new(TokenType::LiteralFloat,s,0);
-                    tx.send(token);
+                    tx.send(token)?;
                 }else {
                     let token = Token::new(TokenType::LiteralInteger, s,0);
-                    tx.send(token);
+                    tx.send(token)?;
                 }
                 continue;
             }
@@ -95,7 +103,7 @@ impl Lexer {
                 s.push(c);
                 let result = Lexer::read_identifier(&mut iter, s);
                 if result.is_err(){return Err(result.unwrap_err())}
-                tx.send(result.unwrap());
+                tx.send(result.unwrap())?;
                 continue;
             }
 
@@ -103,7 +111,7 @@ impl Lexer {
            return Err(LexerError::UnknownCharacter(c));
         }
 
-        tx.send(Token::new(TokenType::EoF,"".into(),0));
+        tx.send(Token::new(TokenType::EoF,"".into(),0))?;
         Ok(())
     }
 
@@ -150,8 +158,14 @@ impl Lexer {
 #[derive(Eq, PartialEq,Copy, Clone,Ord, PartialOrd,Hash,Debug)]
 pub enum LexerError{
     UnexpectedEndOfString,
-    NAN, //not a number
     UnknownCharacter(char),
+    ClosedTokenStream,
+}
+
+impl From<SendError<Token>> for LexerError {
+    fn from(_: SendError<Token>) -> Self {
+        LexerError::ClosedTokenStream
+    }
 }
 
 /// language operators like +
@@ -223,9 +237,11 @@ fn match_keyword(value: &str) -> TokenType{
         "boolean" => TokenType::Boolean,
         "true" => TokenType::BooleanTrue,
         "false" => TokenType::BooleanFalse,
-        "integer" => TokenType::Integer,
+        "int" => TokenType::Integer,
         "float" => TokenType::Float,
         "string" => TokenType::String,
+        "and" => TokenType::And,
+        "or" => TokenType::Or,
         _ => TokenType::Identifier
     }
 }

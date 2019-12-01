@@ -1,68 +1,58 @@
 
-use frontend::syntax::{DataType, DataValue};
+use crate::frontend::syntax::{DataType, DataValue};
 
-/// Represents an unique id of an Node in the abstract frontend.syntax tree
-#[derive(Copy, Clone,Eq, PartialEq,Ord, PartialOrd,Debug,Hash)]
-pub struct NodeId {
-    id: u32,
-}
-
-impl NodeId {
-
-    /// Creates a new NodeId with a certain id
-    pub fn new(id: u32) -> NodeId{
-        NodeId{id}
-    }
-
-    /// creates a new NodeId which is the successor of the given NodeId
-    pub fn new_next_id(node: NodeId) -> NodeId{
-        let next = node.as_u32() + 1;
-        NodeId::new(next)
-    }
-
-    /// returns the unique id as u32
-    pub fn as_u32(&self) -> u32{
-        self.id
-    }
-
-}
-
-/// Represents an Id for identify an Symbol/Variable on the Stack,
-/// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
-#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
-pub struct SymbolId {
-    id: u32
-}
-
-impl SymbolId {
-
-    pub fn new(id: u32) -> SymbolId {
-        SymbolId{id}
-    }
-
-    /// Returns a new SymbolId which is the successor of this SymbolId
-    pub fn successor(&self) -> SymbolId {
-        SymbolId{id: self.id + 1}
-    }
-
-    /// returns this id as u32
-    pub fn as_u32(&self) -> u32{
-        self.id
-    }
-}
+///// Represents an Id for identify an Symbol/Variable on the Stack,
+///// like ' let x = 5;'  so we replace 'x' intern with an unique id (SymbolId)
+//#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
+//pub struct SymbolId {
+//    id: u32
+//}
+//
+//impl SymbolId {
+//
+//    pub fn new(id: u32) -> SymbolId {
+//        SymbolId{id}
+//    }
+//
+//    /// Returns a new SymbolId which is the successor of this SymbolId
+//    pub fn successor(&self) -> SymbolId {
+//        SymbolId{id: self.id + 1}
+//    }
+//
+//    /// returns this id as u32
+//    pub fn as_u32(&self) -> u32{
+//        self.id
+//    }
+//}
+//
+//impl From<u32> for SymbolId {
+//    fn from(n: u32) -> Self {
+//        SymbolId::new(n)
+//    }
+//}
 
 /// Representation of the abstract frontend.syntax tree (short AST).
 /// represents the program in memory
+#[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct AbstractSyntaxTree {
-    /// First Statement in the AST, its always the main() function
-    pub root: Statement,
+    pub nodes: Vec<Statement>,
+}
+
+impl AbstractSyntaxTree{
+    pub fn new(stmts: Vec<Statement>) -> AbstractSyntaxTree{
+        AbstractSyntaxTree{nodes: stmts}
+    }
 }
 
 /// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Statement {
-    pub uid: NodeId,
     pub kind: StatementKind,
+}
+impl Statement{
+    pub fn new(kind: StatementKind) -> Statement{
+        Statement{kind}
+    }
 }
 
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
@@ -71,40 +61,39 @@ pub enum StatementKind {
     Expression(Expression),
 }
 
-/// Represents an Expression
-#[derive(PartialEq, PartialOrd,Debug,Clone)]
-pub struct Expression {
-    pub uid: NodeId,
-    pub kind: ExpressionKind,
-}
-
 //TODO example
 /// Represents an Binding of a value to a symbol (name of a variable)
-#[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq,Copy)]
+#[derive(PartialEq, PartialOrd,Hash,Debug,Clone,Ord, Eq)]
 pub struct VariableBinding {
-    pub uid: NodeId,
     pub data_type: DataType,
-    pub symbol: SymbolId,
+    pub symbol: String,
+}
+impl VariableBinding{
+    pub fn new(data_type: DataType,symbol: String) -> VariableBinding{
+        VariableBinding{data_type,symbol}
+    }
 }
 
-/// Enum of different
+/// Enum of all Expressions
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum ExpressionKind {
+pub enum Expression {
     /// call of an std function or a user created function,
     /// String represents the function name
-    FnCall(String,Option<Vec<Argument>>),
-    /// Declaration of a new Function, String = Name, Option with possible arguments
+    FnCall(String,Vec<Expression>),
+    /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
     /// and an Option of an Returned DataType
-    FnDecl(String,Option<Vec<Argument>>,Option<DataType>),
+    FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
     /// binary operator like "*" or "!="
-    BinaryOp(BinOp,Box<Expression>,Box<Expression>),
+    BinaryOp(Box<Expression>,BinOp,Box<Expression>),
     /// If statement with an optional else block.
     /// if "expression " {block} else {block}
     If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     /// single variable like "counter"
-    Symbol(VariableBinding),
+    Symbol(String),
+    /// Assinment of a symbol/variable
+    Assignment(String,Box<Expression>),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
     /// Break of an loop
@@ -112,7 +101,7 @@ pub enum ExpressionKind {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Box<Option<Expression>>),
+    Return(Option<Box<Expression>>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
     WhileLoop(Box<Expression>,Block),
@@ -143,6 +132,8 @@ pub enum BinOp {
     Lt,
     /// Less Then Equal Operator "a <= b"
     Le,
+    And,
+    Or,
 }
 
 /// Enum of unary operators
@@ -150,20 +141,20 @@ pub enum BinOp {
 pub enum UnOp {
     /// ! Operator for inverting an single Expression
     Negation,
+    Minus,
 }
 
 /// represents an block of statements like if {block} else {block}
 /// or an function call like fn doSomething(){block}
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub struct Block {
-    pub uid: NodeId,
     pub statements: Vec<Statement>,
 }
-
-/// Represents a function argument.
-/// An argument consists of an data Type and the concrete value
-#[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Argument {
-    pub data_type: DataType,
-    pub value: Expression,
+impl Block{
+    pub fn new(stmts: Vec<Statement>) -> Block{
+        Block{statements: stmts}
+    }
+    pub fn add_stmt(&mut self,stmt: Statement){
+        self.statements.push(stmt);
+    }
 }

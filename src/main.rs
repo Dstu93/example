@@ -1,17 +1,17 @@
+use frontend::lexer::Lexer;
+use frontend::parser::ast_parser::*;
 
 mod frontend;
+mod backend;
 #[cfg(test)]
 mod tests;
 
-use std::fs::File;
-use std::io:: {Read,BufRead,BufReader};
-
-use frontend::syntax::*;
-use frontend::lexer::Lexer;
-
 fn main() {
-    let src = " let s = 5; \n let b = a;".into();
+    let src = String::from("fn test(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test1(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test2(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}");
     println!("{}",&src);
-    let res = Lexer::tokenize(src).0.collect();
-    println!("{:#?}",res);
+    let (ts,handle) = Lexer::tokenize(src.clone());
+    let parser = ASTParser::new(ts);
+    let _result  = parser.parse();
+    let result = handle.join();
+    println!("Lexer Result: {:#?}", result);
 }
