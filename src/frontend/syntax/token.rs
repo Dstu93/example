@@ -45,7 +45,6 @@ pub enum TokenType {
     OperatorGreaterOrEqual,
     LiteralInteger,
     LiteralFloat,
-    LiteralBoolean,
     LiteralString,
     /// End of File
     EoF,
@@ -61,6 +60,7 @@ pub struct Token {
     start_position: usize,
 }
 
+#[allow(dead_code)]
 impl Token {
 
     /// creates a new Token.
@@ -82,10 +82,6 @@ impl Token {
         self.kind
     }
 
-    pub fn value(&self) -> &String {
-        &self.value
-    }
-
     /// Consumes this tokens and returns the owned value String
     pub fn move_value(self) -> String{
         self.value
@@ -98,7 +94,7 @@ pub struct TokenStream {
     rx: Receiver<Token>,
     is_closed: bool,
 }
-
+#[allow(dead_code)]
 impl TokenStream{
 
     /// creates a new empty stream with a receiver to fill this stream

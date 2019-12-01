@@ -154,7 +154,4 @@ impl Block{
     pub fn new(stmts: Vec<Statement>) -> Block{
         Block{statements: stmts}
     }
-    pub fn add_stmt(&mut self,stmt: Statement){
-        self.statements.push(stmt);
-    }
 }
