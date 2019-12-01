@@ -20,14 +20,8 @@ pub trait TokenPatternParser{
 
 #[derive(Eq, PartialEq,Debug,Hash,Clone)]
 pub enum ParseError{
-    Unknown,
-    /// This Number token cant get parsed to a number, its invalid
-    NaN(Token),
     /// Found, Expected
     WrongToken(Token,Vec<TokenType>),
     /// Language Mistake with description
     GrammarMistake(&'static str),
-    /// This Token is not allowed outside of a function
-    OutOfFnScope(Token),
-    Missing(TokenType),
 }

@@ -206,12 +206,16 @@ impl ASTParser {
         let less_equal = self.match_next(TokenType::OperatorLessOrEqual);
 
         if greater {
+            self.consume_next_token();
             return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Gt, Box::from(self.addition()?)))
         } else if greater_equal {
+            self.consume_next_token();
             return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Ge, Box::from(self.addition()?)))
         } else if less {
+            self.consume_next_token();
             return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Lt, Box::from(self.addition()?)))
         } else if less_equal {
+            self.consume_next_token();
             return Ok(Expression::BinaryOp(Box::from(expr), BinOp::Le, Box::from(self.addition()?)))
         }
 
@@ -450,7 +454,11 @@ impl ASTParser {
     }
 
     fn parse_while_stmt(&mut self) -> Result<Statement,ParseError> {
-        unimplemented!("parsing while stmt is not implemented");
+        self.expect_nxt_and_consume(TokenType::While)?;
+        let while_condition = self.parse_expression()?;
+        let while_block = self.parse_block_stmt()?;
+        let while_expr = Expression::WhileLoop(Box::from(while_condition), while_block);
+        Ok(Statement::new(StatementKind::Expression(while_expr)))
     }
 
     fn parse_return_stmt(&mut self) -> Result<Statement,ParseError> {

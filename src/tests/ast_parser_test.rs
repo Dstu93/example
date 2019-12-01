@@ -15,7 +15,7 @@ fn fun_main_function(){
     }");
 
 
-    let (ts,handle) = Lexer::tokenize(src);
+    let (ts,_) = Lexer::tokenize(src);
     let parser = ASTParser::new(ts);
     let ast= parser.parse().expect("expect abstract syntax tree");
 
@@ -49,7 +49,7 @@ fn function_with_return_type_test(){
         return \"a b c d e f g\";\
     }");
 
-    let (ts,handle) = Lexer::tokenize(src.clone());
+    let (ts,_) = Lexer::tokenize(src.clone());
     let ast = ASTParser::new(ts).parse().expect("expected abstract syntax tree");
 
     let return_str = Expression::Literal(DataValue::String("a b c d e f g".into()));
@@ -95,4 +95,69 @@ fn function_with_arguments() {
 
     let expected_ast = AbstractSyntaxTree::new(vec![test_fn]);
     assert_eq!(ast,expected_ast);
+}
+
+#[test]
+fn while_test() {
+    let src = String::from("\
+    fn count(start: int, end: int) {\
+        while start < end {
+            start = start + 1;
+        }
+    }");
+
+    let (ts,_) = Lexer::tokenize(src);
+    let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
+
+    let var_start = Expression::Symbol("start".into());
+    let constant =  Expression::Literal(DataValue::Integer("1".into()));
+    let increment = Expression::BinaryOp(Box::from(var_start), BinOp::Plus, Box::from(constant));
+    let assignment = Expression::Assignment("start".into(), Box::from(increment));
+    let while_condition = Expression::BinaryOp(Box::from(Expression::Symbol("start".into())), BinOp::Lt, Box::from(Expression::Symbol("end".into())));
+
+    let stmts = vec![Statement::new(StatementKind::Expression(assignment))];
+    let while_block = Block::new(stmts);
+
+    let while_stmt = Statement::new(
+        StatementKind::Expression(Expression::WhileLoop(Box::from(while_condition), while_block)));
+
+    let function_stmts = vec![while_stmt];
+    let start = VariableBinding::new(DataType::Integer,"start".into());
+    let end = VariableBinding::new(DataType::Integer,"end".into());
+    let fn_decl = Expression::FnDecl("count".into(),Block::new(function_stmts), Some(vec![start,end]), None);
+    let function = Statement::new(StatementKind::Expression(fn_decl));
+    let expected_ast = AbstractSyntaxTree::new(vec![function]);
+    assert_eq!(ast,expected_ast);
+}
+
+#[test]
+fn math_expression() {
+    let src = String::from("fn doMath() {\
+        let x: float = a - b * ( c/d + e/f);
+    }");
+
+    let c = Expression::Symbol(String::from("c"));
+    let d = Expression::Symbol(String::from("d"));
+    let e = Expression::Symbol(String::from("e"));
+    let f = Expression::Symbol(String::from("f"));
+
+    let a = Expression::Symbol(String::from("a"));
+    let b = Expression::Symbol(String::from("b"));
+
+    let c_div_d = Expression::BinaryOp(Box::from(c), BinOp::Divide, Box::from(d));
+    let e_div_f = Expression::BinaryOp(Box::from(e), BinOp::Divide, Box::from(f));
+    let addition = Expression::BinaryOp(Box::from(c_div_d), BinOp::Plus, Box::from(e_div_f));
+    let multiplication = Expression::BinaryOp(Box::from(b), BinOp::Multi, Box::from(addition));
+    let subtraction = Expression::BinaryOp(Box::from(a), BinOp::Minus, Box::from(multiplication));
+    let binding = VariableBinding::new(DataType::Float,"x".into());
+    let let_stmt =  Statement::new(StatementKind::Declaration(binding,subtraction));
+
+    let function_block = Block::new(vec![let_stmt]);
+    let fn_decl = Expression::FnDecl("doMath".into(),function_block,None,None);
+    let fn_stmt = Statement::new(StatementKind::Expression(fn_decl));
+    let expected_ast = AbstractSyntaxTree::new(vec![fn_stmt]);
+
+    let (ts,_) = Lexer::tokenize(src);
+    let ast = ASTParser::new(ts).parse().expect("ast parsing failed");
+    assert_eq!(expected_ast,ast);
 }

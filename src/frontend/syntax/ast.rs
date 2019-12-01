@@ -42,10 +42,6 @@ impl AbstractSyntaxTree{
     pub fn new(stmts: Vec<Statement>) -> AbstractSyntaxTree{
         AbstractSyntaxTree{nodes: stmts}
     }
-
-    pub fn add_stmt(&mut self,stmt: Statement){
-        self.nodes.push(stmt);
-    }
 }
 
 /// Represents an Statement
