@@ -7,11 +7,18 @@ mod backend;
 mod tests;
 
 fn main() {
-    let src = String::from("fn test(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test1(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}\nfn test2(): boolean{\n\tlet s = 5;\n\tlet b = a;\n\tif s == 5 { \n\t\treturn true; \n\t} \t\n}");
+    let src = String::from("\
+        fn fibonacci(n: int): int {
+            if n == 1 or n == 2 {
+               return 1;
+            }
+
+            return fibonacci(n - 1) + fibonacci(n - 2);
+        }
+    ");
     println!("{}",&src);
-    let (ts,handle) = Lexer::tokenize(src.clone());
+    let (ts,_) = Lexer::tokenize(src.clone());
     let parser = ASTParser::new(ts);
-    let _result  = parser.parse();
-    let result = handle.join();
+    let result  = parser.parse();
     println!("Lexer Result: {:#?}", result);
 }
