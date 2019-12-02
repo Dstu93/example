@@ -1,21 +1,16 @@
-
-use frontend::syntax::{DataValue,DataType,ast::*};
-
-use std::collections::HashMap;
+use crate::frontend::syntax::ast::AbstractSyntaxTree;
 
 /// Takes an AbstractSyntaxTree and executes it at runtime.
-pub struct RuntimeInterpreter {
-    /// table of symbols and its values on the heap
-    symbol_table: HashMap<SymbolId, DataValue>,
-    ast: AbstractSyntaxTree,
-    pos: NodeId,
+pub struct RuntimeInterpreter<'a> {
+    ast: &'a AbstractSyntaxTree,
+    heap:
 }
 
-impl RuntimeInterpreter {
+impl <'a>RuntimeInterpreter<'a> {
 
     /// creates a new RuntimeInterpreter Object with an AbstractSyntaxTree to execute
-    pub fn new(ast: AbstractSyntaxTree) -> Self{
-        RuntimeInterpreter{symbol_table: HashMap::new(),ast,pos: 0}
+    pub fn new(ast: &'a AbstractSyntaxTree) -> Self {
+        RuntimeInterpreter{ast}
     }
 
     /// starts the RuntimeInterpreter and executes the program described by the AbstractSyntaxTree.

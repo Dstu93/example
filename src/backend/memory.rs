@@ -1,88 +1,76 @@
-//use std::rc::Rc;
-//use std::collections::BTreeMap;
-//use std::iter::Cycle;
-//
-///// Heap where objects can be stored
-///// and the objects without an pointer will be freed automatic
-///// by the Garbage Collector at Runtime
-//pub struct GCHeap<T> {
-//    young: BTreeMap<u32,(u8,T)>,
-//    old: BTreeMap<u32,(u8,T)>,
-//    perm: BTreeMap<u32,T>,
-//    next_address: Cycle<u32>,
-//}
-//
-//impl <T>GCHeap<T> {
-//
-//    pub fn new() -> Self{
-//        GCHeap{
-//            young: BTreeMap::new(),
-//            old: BTreeMap::new(),
-//            perm: BTreeMap::new(),
-//            next_address: Cycle::,
-//        }
-//    }
-//
-//    pub fn minor_collect(&mut self) {
-//        self.young = self.young.into_iter().
-//            filter(|e| e.0.ref_count() == 1 as usize)
-//            .collect();
-//        self.young.iter_mut().for_each(|e| (e.1).0 += 1);
-//    }
-//
-//    pub fn collect(&mut self) {
-//        self.young = self.young.into_iter().filter(|e| e.0.ref_count() == 1 as usize).collect();
-//        self.old = self.old.into_iter().filter(|e| e.0.ref_count() == 1 as usize).collect();
-//    }
-//
-//    pub fn alloc(&mut self, v: T) -> Result<Ptr,AllocError>{
-//        if self.last_address == ::std::u32::MAX {
-//            // TODO start Garbage Collection and search for the next free address
-//            return Err(AllocError::OutOfAddressSpace);
-//        }
-//
-//        let next = self.last_address + 1;
-//        let ptr = Ptr::new(next, HeapGen::Young);
-//        self.last_address = next;
-//        self.young.insert(ptr.clone(),(0,v));
-//        Ok(ptr)
-//    }
-//}
-//
-//
-//#[derive(Ord, PartialOrd, Eq, PartialEq,Clone,Hash,Debug)]
-//pub struct Ptr {
-//    ptr: Rc<(u32,HeapGen)>,
-//}
-//
-//impl Ptr {
-//
-//    fn new(n: u32, gen: HeapGen) -> Self{
-//        Ptr {ptr: Rc::new((n,gen))
-//    }
-//
-//    pub fn invalidate(self){}
-//
-//    fn ref_count(&self) -> usize{
-//        Rc::strong_count(&self.ptr)
-//    }
-//
-//}
-//
-///// Enumeration of all errors that can occur when allocating new memory
-//#[derive(PartialOrd, PartialEq,Copy, Clone,Ord, Eq,Debug,Hash)]
-//pub enum AllocError {
-//    /// The Heap is full and no extra space can be allocated anymore
-//    OutOfMemory,
-//    /// The number of addresses is exhausted
-//    OutOfAddressSpace,
-//}
-//
-///// Small Enum which represents different types of Heaps.
-//#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Hash,Debug)]
-//enum HeapGen {
-//    Young,
-//    Old,
-//    Perm,
-//}
-//
+
+/// Memmory Management unit for storing Objects, retrieving them and and freeing them.
+pub trait MemUnit<T> {
+    fn allocate(&mut self, obj: T) -> Result<Ptr,AllocError>;
+    fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T>;
+}
+
+/// Enumeration of all errors that can occur when allocating new memory
+#[derive(PartialOrd, PartialEq,Copy, Clone,Ord, Eq,Debug,Hash)]
+pub enum AllocError {
+    /// The Heap is full and no extra space can be allocated anymore
+    OutOfMemory,
+}
+
+#[derive(Ord, PartialOrd, Eq, PartialEq,Copy, Clone,Debug,Hash)]
+pub struct Ptr {
+    idx: usize,
+}
+
+impl Ptr {
+    fn new(idx: usize) -> Ptr{
+        Ptr{idx}
+    }
+}
+
+pub struct Heap<T> {
+    heap: Vec<Option<T>>,
+    max_size: usize,
+}
+
+impl<T> Heap<T> {
+
+    pub fn new(heap_size: usize) -> Self {
+        Heap{heap: Vec::with_capacity(heap_size ),max_size: heap_size}
+    }
+
+}
+
+impl <T> MemUnit<T> for Heap<T> {
+
+    fn allocate(&mut self, obj: T) -> Result<Ptr, AllocError> {
+
+        // Search for the next free position on our 'heap'
+        let free = self.heap
+            .iter()
+            .filter(|e| e.is_none())
+            .enumerate()
+            .next();
+
+        // if there is none free index and our heap cant grow we return a OOM
+        if free.is_none() && (self.heap.len() >= self.max_size)  {
+            return Err(AllocError::OutOfMemory);
+        }
+
+        let index = match free {
+            None => {
+                //We add push it, our heap get a resize and
+                self.heap.len() - 1
+            },
+            Some((idx,_)) => {idx},
+        };
+
+        self.heap.insert(index,Some(obj));
+        let pointer = Ptr::new(index);
+        Ok(pointer)
+    }
+
+    fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T> {
+        let obj = self.heap.get_mut(ptr.idx);
+        match obj {
+            None => {None},
+            Some(v) => v.as_mut(),
+        }
+    }
+
+}
