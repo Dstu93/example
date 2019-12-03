@@ -44,6 +44,11 @@ impl <T> MemUnit<T> for Heap<T> {
 
     fn allocate(&mut self, obj: T) -> Result<Ptr, AllocError> {
 
+        if self.heap.len() < self.max_size {
+            self.heap.push(Some(obj));
+            return Ok(Ptr::new(self.heap.len() - 1));
+        }
+
         // Search for the next free position on our 'heap'
         let free = self.heap
             .iter()
