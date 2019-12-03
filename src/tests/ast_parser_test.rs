@@ -72,7 +72,7 @@ fn function_with_arguments() {
         return solution;\
     }");
     println!("src: {}",&src);
-    let (ts,handle) = Lexer::tokenize(src);
+    let (ts,_) = Lexer::tokenize(src);
     let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
 
     let return_value = Expression::Symbol("solution".into());
