@@ -47,8 +47,8 @@ impl <T> MemUnit<T> for Heap<T> {
         // Search for the next free position on our 'heap'
         let free = self.heap
             .iter()
-            .filter(|e| e.is_none())
             .enumerate()
+            .filter(|e| e.1.is_none())
             .next();
 
         // if there is none free index and our heap cant grow we return a OOM
@@ -64,9 +64,8 @@ impl <T> MemUnit<T> for Heap<T> {
             },
             Some((idx,_)) => {
                 // we swap our new object to the position in the vector
-                let mut free_container = self.heap.get(idx).unwrap();
-                let new_obj = Some(obj);
-                std::mem::swap(&mut free_container, &mut &new_obj);
+                let mut new_obj = Some(obj);
+                std::mem::swap(self.heap.get_mut(idx).unwrap(), &mut new_obj);
                 idx
             },
         };
@@ -84,8 +83,7 @@ impl <T> MemUnit<T> for Heap<T> {
     }
 
     fn free(&mut self, ptr: Ptr) {
-        let mut to_free = self.heap.get(ptr.idx).expect("invalid pointer");
-        let mut empty_bucket: &Option<T> = &None;
-        std::mem::swap(&mut to_free,&mut empty_bucket);
+        let mut empty_bucket: &mut Option<T> = &mut None;
+        std::mem::swap(self.heap.get_mut(ptr.idx).expect("invalid pointer"),&mut empty_bucket);
     }
 }
