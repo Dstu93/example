@@ -3,6 +3,7 @@
 pub trait MemUnit<T> {
     fn allocate(&mut self, obj: T) -> Result<Ptr,AllocError>;
     fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T>;
+    fn free(&mut self, ptr: Ptr);
 }
 
 /// Enumeration of all errors that can occur when allocating new memory
@@ -23,6 +24,9 @@ impl Ptr {
     }
 }
 
+/// Heap implementation which uses a vector with Option<T>.
+/// If some object will removed/deleted it will replaced by None.
+/// That guarantees us stable indices but has a memory overhead
 pub struct Heap<T> {
     heap: Vec<Option<T>>,
     max_size: usize,
@@ -55,12 +59,18 @@ impl <T> MemUnit<T> for Heap<T> {
         let index = match free {
             None => {
                 //We add push it, our heap get a resize and
+                self.heap.push(Some(obj));
                 self.heap.len() - 1
             },
-            Some((idx,_)) => {idx},
+            Some((idx,_)) => {
+                // we swap our new object to the position in the vector
+                let mut free_container = self.heap.get(idx).unwrap();
+                let new_obj = Some(obj);
+                std::mem::swap(&mut free_container, &mut &new_obj);
+                idx
+            },
         };
 
-        self.heap.insert(index,Some(obj));
         let pointer = Ptr::new(index);
         Ok(pointer)
     }
@@ -73,4 +83,9 @@ impl <T> MemUnit<T> for Heap<T> {
         }
     }
 
+    fn free(&mut self, ptr: Ptr) {
+        let mut to_free = self.heap.get(ptr.idx).expect("invalid pointer");
+        let mut empty_bucket: &Option<T> = &None;
+        std::mem::swap(&mut to_free,&mut empty_bucket);
+    }
 }
