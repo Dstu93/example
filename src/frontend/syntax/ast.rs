@@ -47,9 +47,10 @@ impl AbstractSyntaxTree{
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
 pub enum Statement {
     Declaration(VariableBinding,Expression),
-    /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
+    /// Declaration of a new Function, String = Name,Block of statements in the function Body, vec with arguments
+    /// ( empty if function has no args )
     /// and an Option of an Returned DataType
-    FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
+    FnDecl(String,Block,Vec<VariableBinding>,Option<DataType>),
     /// Break of an loop
     Break,
     /// Continue of an loop

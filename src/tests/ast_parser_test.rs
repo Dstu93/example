@@ -34,7 +34,7 @@ fn fun_main_function(){
     let if_stmt = Statement::If(Box::new(if_condition), block, None);
 
     let block = Block::new(vec![a_declaration,if_stmt]);
-    let main_function = Statement::FnDecl("main".into(), block, None, None);
+    let main_function = Statement::FnDecl("main".into(), block, Vec::new(), None);
 
     let expected_ast = AbstractSyntaxTree::new(vec![main_function]);
     assert_eq!(expected_ast,ast);
@@ -53,7 +53,7 @@ fn function_with_return_type_test(){
     let return_str = Expression::Literal(DataValue::String("a b c d e f g".into()));
     let return_stmt = Statement::Return(Some(Box::new(return_str)));
     let block = Block::new(vec![return_stmt]);
-    let test_fn = Statement::FnDecl("test".into(), block, None, Some(DataType::String));
+    let test_fn = Statement::FnDecl("test".into(), block, Vec::new(), Some(DataType::String));
 
     let expected_ast = AbstractSyntaxTree::new(vec![test_fn]);
     assert_eq!(expected_ast,ast, "We are comparing two ast build from this source: {}",src);
@@ -85,7 +85,7 @@ fn function_with_arguments() {
         VariableBinding::new(DataType::Integer,"y".into())
     ];
     let test_fn_block = Block::new(vec![assignment,return_statement]);
-    let test_fn = Statement::FnDecl("calculate".into(), test_fn_block, Some(args), Some(DataType::Integer));
+    let test_fn = Statement::FnDecl("calculate".into(), test_fn_block, args, Some(DataType::Integer));
 
     let expected_ast = AbstractSyntaxTree::new(vec![test_fn]);
     assert_eq!(ast,expected_ast);
@@ -117,7 +117,7 @@ fn while_test() {
     let function_stmts = vec![while_stmt];
     let start = VariableBinding::new(DataType::Integer,"start".into());
     let end = VariableBinding::new(DataType::Integer,"end".into());
-    let fn_decl = Statement::FnDecl("count".into(),Block::new(function_stmts), Some(vec![start,end]), None);
+    let fn_decl = Statement::FnDecl("count".into(),Block::new(function_stmts), vec![start,end], None);
     let expected_ast = AbstractSyntaxTree::new(vec![fn_decl]);
     assert_eq!(ast,expected_ast);
 }
@@ -145,7 +145,7 @@ fn math_expression() {
     let let_stmt =  Statement::Declaration(binding, subtraction);
 
     let function_block = Block::new(vec![let_stmt]);
-    let fn_decl = Statement::FnDecl("doMath".into(),function_block,None,None);
+    let fn_decl = Statement::FnDecl("doMath".into(),function_block,Vec::new(),None);
     let expected_ast = AbstractSyntaxTree::new(vec![fn_decl]);
 
     let (ts,_) = Lexer::tokenize(src);

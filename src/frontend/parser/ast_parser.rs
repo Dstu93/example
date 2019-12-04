@@ -91,8 +91,7 @@ impl ASTParser {
 
         //parsing the function body
         let block = self.parse_block_stmt()?;
-        let opt_args = if args.is_empty() { None} else { Some(args) };
-        let fn_stmt = Statement::FnDecl(fn_name, block, opt_args, return_type);
+        let fn_stmt = Statement::FnDecl(fn_name, block, args, return_type);
         Ok(fn_stmt)
     }
 
