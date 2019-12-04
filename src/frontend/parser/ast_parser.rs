@@ -400,7 +400,7 @@ impl ASTParser {
 
     fn parse_if(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::If)?;
-        let condition_expr = Box::new(self.parse_expression()?);
+        let condition_expr = self.parse_expression()?;
         self.expect_nxt(TokenType::SeparatorCurvedBracketOpen)?;
         let if_block = self.parse_block_stmt()?;
         let else_block = match self.lookup_next().kind() {
@@ -454,7 +454,7 @@ impl ASTParser {
         self.expect_nxt_and_consume(TokenType::While)?;
         let while_condition = self.parse_expression()?;
         let while_block = self.parse_block_stmt()?;
-        let while_stmt = Statement::WhileLoop(Box::from(while_condition), while_block);
+        let while_stmt = Statement::WhileLoop(while_condition, while_block);
         Ok(while_stmt)
     }
 
@@ -466,7 +466,7 @@ impl ASTParser {
                 self.consume_next_token();
                 None
             }
-            _ => {Some(Box::new(self.parse_expression()?))}
+            _ => Some(self.parse_expression()?),
         };
         let return_stmt = Statement::Return(expr);
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;

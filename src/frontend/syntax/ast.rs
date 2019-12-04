@@ -56,15 +56,15 @@ pub enum Statement {
     /// Continue of an loop
     Continue,
     /// Return statement, can return an value or nothing
-    Return(Option<Box<Expression>>),
+    Return(Option<Expression>),
     /// While loop. The expression represents the condition and the
     /// block will be executed every loop cycle
-    WhileLoop(Box<Expression>,Block),
+    WhileLoop(Expression,Block),
     /// loop{block}, loops until break or return statement
     Loop(Block),
     /// If statement with an optional else block.
     /// if "expression " {block} else {block}
-    If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
+    If(Expression,Block,Option<Block>), //Expression must be boxed because of recursion
     Expression(Expression),
 }
 

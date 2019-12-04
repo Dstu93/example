@@ -31,7 +31,7 @@ fn fun_main_function(){
     let print_call = Expression::FnCall("print".into(), args);
     let print_stmt = Statement::Expression(print_call);
     let block = Block::new(vec![print_stmt]);
-    let if_stmt = Statement::If(Box::new(if_condition), block, None);
+    let if_stmt = Statement::If(if_condition, block, None);
 
     let block = Block::new(vec![a_declaration,if_stmt]);
     let main_function = Statement::FnDecl("main".into(), block, Vec::new(), None);
@@ -51,7 +51,7 @@ fn function_with_return_type_test(){
     let ast = ASTParser::new(ts).parse().expect("expected abstract syntax tree");
 
     let return_str = Expression::Literal(DataValue::String("a b c d e f g".into()));
-    let return_stmt = Statement::Return(Some(Box::new(return_str)));
+    let return_stmt = Statement::Return(Some(return_str));
     let block = Block::new(vec![return_stmt]);
     let test_fn = Statement::FnDecl("test".into(), block, Vec::new(), Some(DataType::String));
 
@@ -72,7 +72,7 @@ fn function_with_arguments() {
     let ast = ASTParser::new(ts).parse().expect("Expected Abstract Syntax Tree");
 
     let return_value = Expression::Symbol("solution".into());
-    let return_statement = Statement::Return(Some(Box::new(return_value)));
+    let return_statement = Statement::Return(Some(return_value));
     let y = Expression::Symbol("y".into());
     let x = Expression::Symbol("x".into());
     let multiplication = Expression::BinaryOp(Box::new(x), BinOp::Multi, Box::new(y));
@@ -112,7 +112,7 @@ fn while_test() {
     let stmts = vec![Statement::Expression(assignment)];
     let while_block = Block::new(stmts);
 
-    let while_stmt = Statement::WhileLoop(Box::from(while_condition), while_block);
+    let while_stmt = Statement::WhileLoop(while_condition, while_block);
 
     let function_stmts = vec![while_stmt];
     let start = VariableBinding::new(DataType::Integer,"start".into());
