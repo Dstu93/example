@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::frontend::parser::token_pattern::ParseError;
-use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, StatementKind, VariableBinding, BinOp, UnOp};
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, VariableBinding, BinOp, UnOp};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::token::{Token, TokenStream, TokenType};
 
@@ -92,8 +92,7 @@ impl ASTParser {
         //parsing the function body
         let block = self.parse_block_stmt()?;
         let opt_args = if args.is_empty() { None} else { Some(args) };
-        let fn_stmt_expr = Expression::FnDecl(fn_name, block, opt_args, return_type);
-        let fn_stmt = Statement::new(StatementKind::Expression(fn_stmt_expr));
+        let fn_stmt = Statement::FnDecl(fn_name, block, opt_args, return_type);
         Ok(fn_stmt)
     }
 
@@ -397,7 +396,7 @@ impl ASTParser {
     fn parse_expression_stmt(&mut self) -> Result<Statement,ParseError> {
         let expr = self.parse_expression()?;
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
-        Ok(Statement::new(StatementKind::Expression(expr)))
+        Ok(Statement::Expression(expr))
     }
 
     fn parse_if(&mut self) -> Result<Statement,ParseError> {
@@ -413,8 +412,7 @@ impl ASTParser {
             }
             _ => {None}
         };
-        let if_expr = Expression::If(condition_expr, if_block, else_block);
-        let if_stmt = Statement::new(StatementKind::Expression(if_expr));
+        let if_stmt = Statement::If(condition_expr, if_block, else_block);
         Ok(if_stmt)
     }
 
@@ -428,7 +426,7 @@ impl ASTParser {
         let expr = self.parse_expression()?;
         let binding = VariableBinding::new(variable_type,variable_name);
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
-        Ok(Statement::new(StatementKind::Declaration(binding,expr)))
+        Ok(Statement::Declaration(binding, expr))
     }
 
     fn parse_loop(&mut self) -> Result<Statement,ParseError> {
@@ -436,13 +434,13 @@ impl ASTParser {
         self.consume_next_token(); //consume the loop token
         self.expect_nxt(TokenType::SeparatorCurvedBracketOpen)?;
         let loop_block = self.parse_block_stmt()?;
-        let loop_expr = Expression::Loop(loop_block);
-        Ok(Statement::new(StatementKind::Expression(loop_expr)))
+        let loop_stmt = Statement::Loop(loop_block);
+        Ok(loop_stmt)
     }
 
     fn parse_break_stmt(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::Break)?;
-        let break_stmt = Statement::new(StatementKind::Expression(Expression::Break));
+        let break_stmt = Statement::Break;
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(break_stmt)
     }
@@ -450,15 +448,15 @@ impl ASTParser {
     fn parse_continue_stmt(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::Continue)?;
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
-        Ok(Statement::new(StatementKind::Expression(Expression::Continue)))
+        Ok(Statement::Continue)
     }
 
     fn parse_while_stmt(&mut self) -> Result<Statement,ParseError> {
         self.expect_nxt_and_consume(TokenType::While)?;
         let while_condition = self.parse_expression()?;
         let while_block = self.parse_block_stmt()?;
-        let while_expr = Expression::WhileLoop(Box::from(while_condition), while_block);
-        Ok(Statement::new(StatementKind::Expression(while_expr)))
+        let while_stmt = Statement::WhileLoop(Box::from(while_condition), while_block);
+        Ok(while_stmt)
     }
 
     fn parse_return_stmt(&mut self) -> Result<Statement,ParseError> {
@@ -471,8 +469,7 @@ impl ASTParser {
             }
             _ => {Some(Box::new(self.parse_expression()?))}
         };
-        let return_expr = Expression::Return(expr);
-        let return_stmt = Statement::new(StatementKind::Expression(return_expr));
+        let return_stmt = Statement::Return(expr);
         self.expect_nxt_and_consume(TokenType::SeparatorSemiColon)?;
         Ok(return_stmt)
     }

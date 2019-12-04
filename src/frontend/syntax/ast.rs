@@ -44,20 +44,26 @@ impl AbstractSyntaxTree{
     }
 }
 
-/// Represents an Statement
 #[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub struct Statement {
-    pub kind: StatementKind,
-}
-impl Statement{
-    pub fn new(kind: StatementKind) -> Statement{
-        Statement{kind}
-    }
-}
-
-#[derive(PartialOrd, PartialEq,Clone,Debug)]
-pub enum StatementKind {
+pub enum Statement {
     Declaration(VariableBinding,Expression),
+    /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
+    /// and an Option of an Returned DataType
+    FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
+    /// Break of an loop
+    Break,
+    /// Continue of an loop
+    Continue,
+    /// Return statement, can return an value or nothing
+    Return(Option<Box<Expression>>),
+    /// While loop. The expression represents the condition and the
+    /// block will be executed every loop cycle
+    WhileLoop(Box<Expression>,Block),
+    /// loop{block}, loops until break or return statement
+    Loop(Block),
+    /// If statement with an optional else block.
+    /// if "expression " {block} else {block}
+    If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
     Expression(Expression),
 }
 
@@ -80,33 +86,16 @@ pub enum Expression {
     /// call of an std function or a user created function,
     /// String represents the function name
     FnCall(String,Vec<Expression>),
-    /// Declaration of a new Function, String = Name,Block of statements in the function Body, Option with possible arguments
-    /// and an Option of an Returned DataType
-    FnDecl(String,Block,Option<Vec<VariableBinding>>,Option<DataType>),
     /// Unary Operator Expression like "!isValid"
     UnaryOp(UnOp,Box<Expression>),
-    /// binary operator like "*" or "!="
-    BinaryOp(Box<Expression>,BinOp,Box<Expression>),
-    /// If statement with an optional else block.
-    /// if "expression " {block} else {block}
-    If(Box<Expression>,Block,Option<Block>), //Expression must be boxed because of recursion
-    /// single variable like "counter"
-    Symbol(String),
     /// Assinment of a symbol/variable
     Assignment(String,Box<Expression>),
+    /// binary operator like "*" or "!="
+    BinaryOp(Box<Expression>,BinOp,Box<Expression>),
+    /// single variable like "counter"
+    Symbol(String),
     /// represents a literal like "42" or "foobar"
     Literal(DataValue),
-    /// Break of an loop
-    Break,
-    /// Continue of an loop
-    Continue,
-    /// Return statement, can return an value or nothing
-    Return(Option<Box<Expression>>),
-    /// While loop. The expression represents the condition and the
-    /// block will be executed every loop cycle
-    WhileLoop(Box<Expression>,Block),
-    /// loop{block}, loops until break or return statement
-    Loop(Block),
 }
 
 /// Enum of binary operators
