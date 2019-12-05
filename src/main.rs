@@ -35,7 +35,7 @@ fn main() {
     let calculated_heap_size = 512 * 1024 * 1024 / std::mem::size_of::<DataValue>();
     println!("max heap size: {}", calculated_heap_size);
     let heap_space = Heap::new(calculated_heap_size);
-    let mut interpreter = RuntimeInterpreter::new(&ast,heap_space);
+    let mut interpreter = RuntimeInterpreter::new(&ast,Box::new(heap_space));
     let execution_result = interpreter.start();
     match execution_result {
         Ok(_) => {},

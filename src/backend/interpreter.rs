@@ -1,24 +1,25 @@
 use std::collections::HashMap;
 
 use crate::backend::interpreter::RuntimeError::ExpectedFnDeclaration;
-use crate::backend::memory::{MemUnit, Ptr};
+use crate::backend::memory::{MemUnit, Ptr, AllocError};
 use crate::frontend::syntax::{DataType, DataValue};
-use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Statement, VariableBinding};
+use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Statement, VariableBinding, Expression};
 
 type FnTable<'a> = HashMap<&'a str, Funct<'a>>;
-type SymbolTable<'b> = HashMap<&'b str,Ptr>;
+type SymbolTable<'b> = HashMap<&'b str,(Ptr,DataType)>;
+type Heap = Box<dyn MemUnit<DataValue>>;
 
 /// Takes an AbstractSyntaxTree and executes it at runtime.
-pub struct RuntimeInterpreter<'a,T> where T: MemUnit<DataValue> {
+pub struct RuntimeInterpreter<'a> {
     ast: &'a AbstractSyntaxTree,
-    heap: T,
+    heap: Heap,
     fn_table: FnTable<'a>,
 }
 
-impl <'a,T>RuntimeInterpreter<'a,T> where T: MemUnit<DataValue> {
+impl <'a>RuntimeInterpreter<'a> {
 
     /// creates a new RuntimeInterpreter Object with an AbstractSyntaxTree to execute
-    pub fn new(ast: &'a AbstractSyntaxTree, mem_unit: T) -> Self {
+    pub fn new(ast: &'a AbstractSyntaxTree, mem_unit: Heap) -> Self {
         RuntimeInterpreter{
             ast,
             heap: mem_unit,
@@ -57,18 +58,42 @@ impl <'a,T>RuntimeInterpreter<'a,T> where T: MemUnit<DataValue> {
         for stmt in &main_func.body.statements {
             match stmt {
                 Statement::Declaration(var, exp) => {
-                    //TODO resolve and put variable on the heap and symbol table
+                    let scope = Scope{
+                        fntbl: &self.fn_table,
+                        symtbl: &mut symbol_table,
+                        heap: &mut self.heap
+                    };
+                    let value = resolve_expression(scope)?;
+                    if let Some(v) = value {
+                        let ptr = self.heap.allocate(v)?;
+                        symbol_table.insert(&var.symbol,(ptr,var.data_type));
+                    }
                 },
                 Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
                 Statement::Break => invalid_stmt(Statement::Break, "break is only allowed in loops")?,
                 Statement::Continue => {invalid_stmt(Statement::Continue,"contine is only allowed in loops")?},
                 Statement::Return(e) => {
+                    //Mainfunction does not return data
+                    if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
+                    return Ok(());
+                },
+                Statement::WhileLoop(_, _) => {
 
                 },
-                Statement::WhileLoop(_, _) => {},
                 Statement::Loop(_) => {},
                 Statement::If(_, _, _) => {},
-                Statement::Expression(_) => {},
+                Statement::Expression(e) => {
+                    match e {
+                        Expression::FnCall(name, arguments) => {
+
+                        },
+                        Expression::UnaryOp(_, _) => {},
+                        Expression::Assignment(_, _) => {},
+                        Expression::BinaryOp(_, _, _) => {},
+                        Expression::Symbol(_) => {},
+                        Expression::Literal(_) => {},
+                    };
+                },
             }
         };
         Ok(())
@@ -76,12 +101,30 @@ impl <'a,T>RuntimeInterpreter<'a,T> where T: MemUnit<DataValue> {
 
 }
 
-fn execute_function<'a,T>(func: &Funct,
-                          fn_map: &FnTable,
-                          heap: &mut T,
-                          stack: SymbolTable) -> Result<(),RuntimeError> where T: MemUnit<DataValue> {
+fn execute_function<'a>(func: &Funct, fntbl: &FnTable, heap: &mut Heap) -> Result<Option<DataValue>,RuntimeError> {
 
-    Ok(())
+    Ok(None)
+}
+
+fn resolve_expression(scope: Scope) -> Result<Option<DataValue>,RuntimeError> {
+    //TODO
+    Ok(None)
+}
+
+/// wrapper for a function declaration
+struct Funct<'a> {
+    pub name: &'a String,
+    pub args: &'a Vec<VariableBinding>,
+    pub return_type: &'a Option<DataType>,
+    pub body: &'a Block,
+}
+
+///Wrapper for fn,symbol-table and heap.
+// used for shortening function signatures
+struct Scope<'a, 'b,'c> {
+    fntbl: &'b FnTable<'a>,
+    symtbl: &'b mut SymbolTable<'c>,
+    heap: &'b mut Heap,
 }
 
 fn invalid_stmt(stmt: Statement, reason: &'static str) -> Result<(),RuntimeError> {
@@ -104,12 +147,12 @@ pub enum RuntimeError {
     /// invalid stmt, reason as string
     InvalidStmt(Statement,&'static str),
     NullPointerError,
+    UnexpectedReturnType,
+    OutOfMemory,
 }
 
-/// wrapper for a function declaration
-struct Funct<'a> {
-    pub name: &'a String,
-    pub args: &'a Vec<VariableBinding>,
-    pub return_type: &'a Option<DataType>,
-    pub body: &'a Block,
+impl From<AllocError> for RuntimeError{
+    fn from(alloc_error: AllocError) -> Self {
+        RuntimeError::OutOfMemory
+    }
 }
