@@ -18,6 +18,11 @@ fn main() {
 
             return fibonacci(n - 1) + fibonacci(n - 2);
         }
+
+        fn main() {
+            let x: int = fibonacci(20);
+            println(x);
+        }
     ");
     println!("{}",&src);
     let (ts,_) = Lexer::tokenize(src.clone());
