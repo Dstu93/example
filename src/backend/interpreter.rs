@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::backend::interpreter::RuntimeError::ExpectedFnDeclaration;
 use crate::backend::memory::{MemUnit, Ptr, AllocError};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Statement, VariableBinding, Expression};
@@ -44,7 +43,7 @@ impl <'a>RuntimeInterpreter<'a> {
                     let function = Funct { name, args, return_type, body: block };
                     self.fn_table.insert(name, function);
                 },
-                _ => return Err(ExpectedFnDeclaration),
+                _ => return Err(RuntimeError::ExpectedFnDeclaration),
             }
         }
         Ok(())
