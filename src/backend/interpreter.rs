@@ -140,7 +140,7 @@ impl <'a>RuntimeInterpreter<'a> {
         Ok(None)
     }
 
-    fn lookup_symbol<'b>(&mut self, symtbl: &mut SymbolTable<'b>, var: &'b String) -> Result<Option<DataValue>,RuntimeError> {
+    fn lookup_symbol(&mut self, symtbl: &mut SymbolTable<'a>, var: &'a String) -> Result<Option<DataValue>,RuntimeError> {
         match symtbl.get(var.as_str()) {
             None => return Err(RuntimeError::VarDoesNotExist(var.clone())),
             Some((ptr, dtype)) => {
