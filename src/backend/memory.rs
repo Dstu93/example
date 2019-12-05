@@ -1,5 +1,5 @@
 
-/// Memmory Management unit for storing Objects, retrieving them and and freeing them.
+/// Memory Management unit for storing Objects, retrieving them and and freeing them.
 pub trait MemUnit<T> {
     fn allocate(&mut self, obj: T) -> Result<Ptr,AllocError>;
     fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T>;
