@@ -57,7 +57,7 @@ impl <'a>RuntimeInterpreter<'a> {
         let mut symbol_table: SymbolTable = HashMap::new();
         for stmt in &main_func.body.statements {
             match stmt {
-                Statement::Declaration(var, exp) => self.var_declaration(&mut symbol_table, stmt, &var, exp)?,
+                Statement::Declaration(var, exp) => self.var_declaration(&mut symbol_table, stmt, &var, &exp)?,
                 Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
                 Statement::Break => invalid_stmt(Statement::Break, "break is only allowed in loops")?,
                 Statement::Continue => {invalid_stmt(Statement::Continue,"contine is only allowed in loops")?},
@@ -66,25 +66,31 @@ impl <'a>RuntimeInterpreter<'a> {
                     if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
                     return Ok(());
                 },
-                Statement::WhileLoop(condition,block) => {
-
-                },
+                Statement::WhileLoop(condition,block) => self.while_expr(&condition, &block, &mut symbol_table)?,
                 Statement::Loop(_) => {},
-                Statement::If(_, _, _) => {},
-                Statement::Expression(e) => {
-                    match e {
-                        Expression::FnCall(name, arguments) => {
-
-                        },
-                        Expression::UnaryOp(_, _) => {},
-                        Expression::Assignment(_, _) => {},
-                        Expression::BinaryOp(_, _, _) => {},
-                        Expression::Symbol(_) => {},
-                        Expression::Literal(_) => {},
-                    };
-                },
+                Statement::If(condition, if_block, else_block) => self.execute_if_stmt(&mut symbol_table, condition, if_block, else_block)?,
+                Statement::Expression(e) => { self.resolve_expression(&e,&mut symbol_table)?; },
             };
         };
+        Ok(())
+    }
+
+    fn execute_if_stmt(&mut self,
+                       mut symbol_table: &mut SymbolTable<'a>,
+                       condition: &'a Expression,
+                       if_block: &'a Block, else_block: &'a Option<Block> ) -> Result<(),RuntimeError> {
+
+        let condition = self.resolve_boolean_expr(condition, &mut symbol_table)?;
+        if condition {
+            //TODO
+            if_block.statements.iter();
+        } else {
+            //TODO
+            match else_block {
+                None => {},
+                Some(else_block) => {},
+            }
+        }
         Ok(())
     }
 
@@ -125,7 +131,7 @@ impl <'a>RuntimeInterpreter<'a> {
                 }
             },
             Expression::UnaryOp(unary_op, expr) => {
-                //TODO invert
+                //TODO
             },
             Expression::Assignment(name, expr) => {
                 //TODO resolve
@@ -151,6 +157,24 @@ impl <'a>RuntimeInterpreter<'a> {
             },
         }
     }
+
+    fn while_expr(&mut self,condition: &'a Expression, block: &Block, symtbl: &mut SymbolTable) -> Result<(),RuntimeError> {
+        //TODO
+        Ok(())
+    }
+
+    fn resolve_boolean_expr(&mut self,condition: &'a Expression,symtbl: &mut SymbolTable<'a>) -> Result<bool,RuntimeError> {
+        let value = self.resolve_expression(condition,symtbl)?;
+        let value = match value {
+            None => return Err(RuntimeError::ExpectedBooleanExpr(condition.clone())),
+            Some(v) => v,
+        };
+
+        match value {
+            DataValue::Boolean(b) => Ok(b),
+            _ => Err(RuntimeError::TypeError(value.clone(), DataType::Boolean)),
+        }
+    }
 }
 
 fn execute_bin_expr(left: &DataValue,op: BinOp, right: &DataValue){
@@ -163,14 +187,6 @@ struct Funct<'a> {
     pub args: &'a Vec<VariableBinding>,
     pub return_type: &'a Option<DataType>,
     pub body: &'a Block,
-}
-
-///Wrapper for fn,symbol-table and heap.
-// used for shortening function signatures
-struct Scope<'a, 'b,'c> {
-    fntbl: &'b FnTable<'a>,
-    symtbl: &'b mut SymbolTable<'c>,
-    heap: &'b mut Heap,
 }
 
 fn invalid_stmt(stmt: Statement, reason: &'static str) -> Result<(),RuntimeError> {
@@ -197,6 +213,8 @@ pub enum RuntimeError {
     FnNotExist(String),
     /// Variable/Symbol does not exist in this scope/stack
     VarDoesNotExist(String),
+    ExpectedBooleanExpr(Expression),
+    TypeError(DataValue,DataType),
     OutOfMemory,
 }
 
