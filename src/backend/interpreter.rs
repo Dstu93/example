@@ -4,6 +4,8 @@ use crate::backend::interpreter::RuntimeError::ExpectedFnDeclaration;
 use crate::backend::memory::{MemUnit, Ptr, AllocError};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Statement, VariableBinding, Expression};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 type FnTable<'a> = HashMap<&'a str, Funct<'a>>;
 type SymbolTable<'b> = HashMap<&'b str,(Ptr,DataType)>;
@@ -12,7 +14,7 @@ type Heap = Box<dyn MemUnit<DataValue>>;
 /// Takes an AbstractSyntaxTree and executes it at runtime.
 pub struct RuntimeInterpreter<'a> {
     ast: &'a AbstractSyntaxTree,
-    heap: Heap,
+    heap: RefCell<Heap>,
     fn_table: FnTable<'a>,
 }
 
@@ -22,8 +24,8 @@ impl <'a>RuntimeInterpreter<'a> {
     pub fn new(ast: &'a AbstractSyntaxTree, mem_unit: Heap) -> Self {
         RuntimeInterpreter{
             ast,
-            heap: mem_unit,
-            fn_table: HashMap::new()
+            heap: RefCell::from(mem_unit),
+            fn_table: HashMap::new(),
         }
     }
 
@@ -58,14 +60,9 @@ impl <'a>RuntimeInterpreter<'a> {
         for stmt in &main_func.body.statements {
             match stmt {
                 Statement::Declaration(var, exp) => {
-                    let scope = Scope{
-                        fntbl: &self.fn_table,
-                        symtbl: &mut symbol_table,
-                        heap: &mut self.heap
-                    };
-                    let value = resolve_expression(scope)?;
+                    let value = self.resolve_expression(&mut symbol_table)?;
                     if let Some(v) = value {
-                        let ptr = self.heap.allocate(v)?;
+                        let ptr = self.heap.get_mut().allocate(v)?;
                         symbol_table.insert(&var.symbol,(ptr,var.data_type));
                     }
                 },
@@ -77,7 +74,7 @@ impl <'a>RuntimeInterpreter<'a> {
                     if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
                     return Ok(());
                 },
-                Statement::WhileLoop(_, _) => {
+                Statement::WhileLoop(condition,block) => {
 
                 },
                 Statement::Loop(_) => {},
@@ -99,16 +96,16 @@ impl <'a>RuntimeInterpreter<'a> {
         Ok(())
     }
 
-}
+    fn execute_function(&mut self, func: &Funct, args: Vec<DataValue>) -> Result<Option<DataValue>,RuntimeError> {
+        //TODO
+        Ok(None)
+    }
 
-fn execute_function<'a>(func: &Funct, fntbl: &FnTable, heap: &mut Heap) -> Result<Option<DataValue>,RuntimeError> {
+    fn resolve_expression(&mut self,symtbl: &mut SymbolTable) -> Result<Option<DataValue>,RuntimeError> {
+        //TODO
+        Ok(None)
+    }
 
-    Ok(None)
-}
-
-fn resolve_expression(scope: Scope) -> Result<Option<DataValue>,RuntimeError> {
-    //TODO
-    Ok(None)
 }
 
 /// wrapper for a function declaration
