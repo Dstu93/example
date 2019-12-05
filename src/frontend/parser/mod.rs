@@ -1,2 +1,2 @@
 pub mod ast_parser;
-pub mod token_pattern;
+pub mod error;

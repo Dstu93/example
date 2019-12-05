@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::frontend::parser::token_pattern::ParseError;
+use crate::frontend::parser::error::ParseError;
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, VariableBinding, BinOp, UnOp};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::token::{Token, TokenStream, TokenType};
