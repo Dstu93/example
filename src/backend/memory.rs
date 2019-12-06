@@ -3,6 +3,7 @@
 pub trait MemUnit<T> {
     fn allocate(&mut self, obj: T) -> Result<Ptr,AllocError>;
     fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T>;
+    fn replace(&mut self, ptr: &Ptr,value: T);
     fn free(&mut self, ptr: Ptr);
 }
 
@@ -85,6 +86,11 @@ impl <T> MemUnit<T> for Heap<T> {
             None => {None},
             Some(v) => v.as_mut(),
         }
+    }
+
+    fn replace(&mut self, ptr: &Ptr, value: T) {
+        let mut value = Some(value);
+        std::mem::swap(self.heap.get_mut(ptr.idx).expect("invalid pointer"), &mut value);
     }
 
     fn free(&mut self, ptr: Ptr) {
