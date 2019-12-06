@@ -1,9 +1,9 @@
-use crate::backend::memory::{Heap, MemUnit, AllocError};
+use crate::backend::memory::{VecHeap, MemUnit, AllocError};
 use crate::frontend::syntax::DataValue;
 
 #[test]
 fn heap_alloc_retrieve_test() {
-    let mut heap= Heap::new(3);
+    let mut heap= VecHeap::new(3);
     let ptr_3= heap.allocate(3).unwrap();
     let ptr_2 = heap.allocate(2).unwrap();
     let ptr_5 = heap.allocate(5).unwrap();
@@ -18,7 +18,7 @@ fn heap_alloc_retrieve_test() {
 
 #[test]
 fn heap_reinsert_test() {
-    let mut heap= Heap::new(3);
+    let mut heap= VecHeap::new(3);
     let _ptr_3= heap.allocate(3).unwrap();
     let ptr_2 = heap.allocate(2).unwrap();
     let _ptr_5 = heap.allocate(5).unwrap();
@@ -35,7 +35,7 @@ fn heap_reinsert_test() {
 
 #[test]
 fn heap_replace_test() {
-    let mut heap= Heap::new(3);
+    let mut heap= VecHeap::new(3);
     let _ptr_3= heap.allocate(3).unwrap();
     let ptr_2 = heap.allocate(2).unwrap();
     let _ptr_5 = heap.allocate(5).unwrap();
