@@ -107,7 +107,20 @@ impl <'a>RuntimeInterpreter<'a> {
     }
 
     fn execute_function(&mut self, func: &Funct, args: Vec<DataValue>) -> Result<Option<DataValue>,RuntimeError> {
-        //TODO
+        let mut symbol_table: SymbolTable = HashMap::new();
+        if func.args.len() != args.len() {
+            return Err(RuntimeError::FnArgsCountMismatch { name: func.name.clone(), found: args.len() as u8, expected: func.args.len() as u8 })
+        }
+        //Add fn arguments on our "stack"/symbol table
+        for (index, value) in args.into_iter().enumerate() {
+            let binding = func.args.get(index).expect("fn args mismatch");
+            typecheck(binding,&value)?;
+            let ptr = self.heap.get_mut().allocate(value)?;
+            symbol_table.insert(binding.symbol.as_str(), (ptr, binding.data_type));
+        }
+
+        //TODO execute statments
+
         Ok(None)
     }
 
@@ -181,6 +194,33 @@ fn execute_bin_expr(left: &DataValue,op: BinOp, right: &DataValue){
 
 }
 
+fn typecheck(binding: &VariableBinding,value: &DataValue) -> Result<(),RuntimeError> {
+    match binding.data_type {
+        DataType::Float => {
+            if let DataValue::Float(_) = value {
+                return Ok(());
+            }
+        },
+        DataType::Integer => {
+            if let DataValue::Integer(_) = value {
+                return Ok(())
+            }
+        },
+        DataType::Boolean => {
+            if let DataValue::Boolean(_) = value {
+                return Ok(())
+            }
+        },
+        DataType::String => {
+            if let DataValue::String(_) = value {
+                return Ok(())
+            }
+        },
+    }
+
+    Err(RuntimeError::WrongType(binding.symbol.clone(),value.clone(),binding.data_type))
+}
+
 /// wrapper for a function declaration
 struct Funct<'a> {
     pub name: &'a String,
@@ -215,6 +255,8 @@ pub enum RuntimeError {
     VarDoesNotExist(String),
     ExpectedBooleanExpr(Expression),
     TypeError(DataValue,DataType),
+    FnArgsCountMismatch{name: String,found: u8,expected: u8},
+    WrongType(String,DataValue,DataType),
     OutOfMemory,
 }
 
