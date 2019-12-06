@@ -124,8 +124,9 @@ fn while_test() {
 
 #[test]
 fn math_expression() {
-    let src = String::from("fn doMath() {\
-        let x: float = a - b * ( c/d + e/f);
+    let src = String::from("\
+        fn doMath() {\
+            let x: float = a - b * ( c/d + e/f);
     }");
 
     let c = Expression::Symbol(String::from("c"));
