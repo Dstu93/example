@@ -3,6 +3,7 @@
 pub trait MemUnit<T> {
     fn allocate(&mut self, obj: T) -> Result<Ptr,AllocError>;
     fn retrieve(&mut self, ptr: &Ptr) -> Option<&mut T>;
+    fn replace(&mut self, ptr: &Ptr,value: T);
     fn free(&mut self, ptr: Ptr);
 }
 
@@ -27,20 +28,20 @@ impl Ptr {
 /// Heap implementation which uses a vector with Option<T>.
 /// If some object will removed/deleted it will replaced by None.
 /// That guarantees us stable indices but has a memory overhead
-pub struct Heap<T> {
+pub struct VecHeap<T> {
     heap: Vec<Option<T>>,
     max_size: usize,
 }
 
-impl<T> Heap<T> {
+impl<T> VecHeap<T> {
 
     pub fn new(heap_size: usize) -> Self {
-        Heap{heap: Vec::with_capacity(heap_size ),max_size: heap_size}
+        VecHeap {heap: Vec::with_capacity(heap_size ),max_size: heap_size}
     }
 
 }
 
-impl <T> MemUnit<T> for Heap<T> {
+impl <T> MemUnit<T> for VecHeap<T> {
 
     fn allocate(&mut self, obj: T) -> Result<Ptr, AllocError> {
 
@@ -85,6 +86,11 @@ impl <T> MemUnit<T> for Heap<T> {
             None => {None},
             Some(v) => v.as_mut(),
         }
+    }
+
+    fn replace(&mut self, ptr: &Ptr, value: T) {
+        let mut value = Some(value);
+        std::mem::swap(self.heap.get_mut(ptr.idx).expect("invalid pointer"), &mut value);
     }
 
     fn free(&mut self, ptr: Ptr) {
