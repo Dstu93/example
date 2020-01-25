@@ -106,7 +106,7 @@ impl <'a>RuntimeInterpreter<'a> {
         }
     }
 
-    fn execute_function(&mut self, func: &Funct, args: Vec<DataValue>) -> Result<Option<DataValue>,RuntimeError> {
+    fn execute_function(&mut self, func: &Funct<'a>, args: Vec<DataValue>) -> Result<Option<DataValue>,RuntimeError> {
         let mut symbol_table: SymbolTable = HashMap::new();
         if func.args.len() != args.len() {
             return Err(RuntimeError::FnArgsCountMismatch { name: func.name.clone(), found: args.len() as u8, expected: func.args.len() as u8 })
@@ -119,7 +119,40 @@ impl <'a>RuntimeInterpreter<'a> {
             symbol_table.insert(binding.symbol.as_str(), (ptr, binding.data_type));
         }
 
-        //TODO execute statments
+        let mut return_value = None;
+        for stmt in &func.body.statements {
+            self.execute_stmt(&mut symbol_table, &stmt)?; //TODO
+        };
+
+
+        Ok(return_value)
+    }
+
+    fn execute_stmt(&mut self, mut symbol_table: &mut SymbolTable<'a>, stmt: &'a Statement) -> Result<Option<DataValue>,RuntimeError> {
+        match stmt {
+            Statement::Declaration(binding, expr) => {
+                self.var_declaration(&mut symbol_table, &stmt, &binding, &expr)?;
+            },
+            Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
+            Statement::Break => {return Ok(None)},
+            Statement::Continue => {return Ok(None)},
+            Statement::Return(e) => {
+                match e {
+                    None => {return Ok(None)},
+                    Some(e) => {
+                        let value = self.resolve_expression(e,&mut symbol_table)?;
+                        return Ok(value);
+                    },
+                }
+            },
+            Statement::WhileLoop(_, _) => {},
+            Statement::Loop(_) => {},
+            Statement::If(condition, if_block, else_block) => {
+                //TODO catch return
+                self.execute_if_stmt(&mut symbol_table,condition,if_block,else_block)?;
+            },
+            Statement::Expression(e) => {self.ex},
+        }
 
         Ok(None)
     }
