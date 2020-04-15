@@ -56,21 +56,25 @@ impl <'a>RuntimeInterpreter<'a> {
 
         let mut symbol_table: SymbolTable = HashMap::new();
         for stmt in &main_func.body.statements {
-            match stmt {
-                Statement::Declaration(var, exp) => self.var_declaration(&mut symbol_table, stmt, &var, &exp)?,
-                Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
-                Statement::Break => invalid_stmt(Statement::Break, "break is only allowed in loops")?,
-                Statement::Continue => {invalid_stmt(Statement::Continue,"contine is only allowed in loops")?},
-                Statement::Return(e) => {
-                    //Mainfunction does not return data
-                    if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
-                    return Ok(());
-                },
-                Statement::WhileLoop(condition,block) => self.while_expr(&condition, &block, &mut symbol_table)?,
-                Statement::Loop(_) => {},
-                Statement::If(condition, if_block, else_block) => self.execute_if_stmt(&mut symbol_table, condition, if_block, else_block)?,
-                Statement::Expression(e) => { self.resolve_expression(&e,&mut symbol_table)?; },
-            };
+            // match stmt {
+            //     Statement::Declaration(var, exp) => self.var_declaration(&mut symbol_table, stmt, &var, &exp)?,
+            //     Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
+            //     Statement::Break => invalid_stmt(Statement::Break, "break is only allowed in loops")?,
+            //     Statement::Continue => {invalid_stmt(Statement::Continue,"contine is only allowed in loops")?},
+            //     Statement::Return(e) => {
+            //         //Mainfunction does not return data
+            //         if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
+            //         return Ok(());
+            //     },
+            //     Statement::WhileLoop(condition,block) => self.while_expr(&condition, &block, &mut symbol_table)?,
+            //     Statement::Loop(_) => {},
+            //     Statement::If(condition, if_block, else_block) => self.execute_if_stmt(&mut symbol_table, condition, if_block, else_block)?,
+            //     Statement::Expression(e) => { self.resolve_expression(&e,&mut symbol_table)?; },
+            // };
+            let ret = self.execute_stmt(&mut symbol_table,stmt)?;
+            if let Some(value) = ret  {
+                return Err(RuntimeError::UnexpectedReturnType);
+            }
         };
         Ok(())
     }
@@ -151,7 +155,7 @@ impl <'a>RuntimeInterpreter<'a> {
                 //TODO catch return
                 self.execute_if_stmt(&mut symbol_table,condition,if_block,else_block)?;
             },
-            Statement::Expression(e) => {self.ex},
+            Statement::Expression(e) => {let _ = self.resolve_expression(e,symbol_table)?;},
         }
 
         Ok(None)
