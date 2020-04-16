@@ -9,6 +9,7 @@ pub enum DataValue {
     Float(String),
     Boolean(bool),
     String(String),
+    None,
 }
 
 /// Enum of all standard data types

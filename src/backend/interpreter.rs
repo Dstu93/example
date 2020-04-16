@@ -56,23 +56,8 @@ impl <'a>RuntimeInterpreter<'a> {
 
         let mut symbol_table: SymbolTable = HashMap::new();
         for stmt in &main_func.body.statements {
-            // match stmt {
-            //     Statement::Declaration(var, exp) => self.var_declaration(&mut symbol_table, stmt, &var, &exp)?,
-            //     Statement::FnDecl(_, _, _, _) => invalid_fn_decl()?,
-            //     Statement::Break => invalid_stmt(Statement::Break, "break is only allowed in loops")?,
-            //     Statement::Continue => {invalid_stmt(Statement::Continue,"contine is only allowed in loops")?},
-            //     Statement::Return(e) => {
-            //         //Mainfunction does not return data
-            //         if e.is_some() { return Err(RuntimeError::UnexpectedReturnType); }
-            //         return Ok(());
-            //     },
-            //     Statement::WhileLoop(condition,block) => self.while_expr(&condition, &block, &mut symbol_table)?,
-            //     Statement::Loop(_) => {},
-            //     Statement::If(condition, if_block, else_block) => self.execute_if_stmt(&mut symbol_table, condition, if_block, else_block)?,
-            //     Statement::Expression(e) => { self.resolve_expression(&e,&mut symbol_table)?; },
-            // };
             let ret = self.execute_stmt(&mut symbol_table,stmt)?;
-            if let Some(value) = ret  {
+            if let Some(_) = ret  {
                 return Err(RuntimeError::UnexpectedReturnType);
             }
         };
@@ -118,7 +103,7 @@ impl <'a>RuntimeInterpreter<'a> {
         //Add fn arguments on our "stack"/symbol table
         for (index, value) in args.into_iter().enumerate() {
             let binding = func.args.get(index).expect("fn args mismatch");
-            typecheck(binding,&value)?;
+            typecheck(&binding.symbol,binding.data_type,&value)?;
             let ptr = self.heap.get_mut().allocate(value)?;
             symbol_table.insert(binding.symbol.as_str(), (ptr, binding.data_type));
         }
@@ -183,11 +168,39 @@ impl <'a>RuntimeInterpreter<'a> {
             Expression::UnaryOp(unary_op, expr) => {
                 //TODO
             },
-            Expression::Assignment(name, expr) => {
-                //TODO resolve
-            },
-            Expression::BinaryOp(left, op, right) => {
+            Expression::Assignment(symbol_name, expr) => {
+                let value = self.resolve_expression(expr,symtbl)?;
+                match symtbl.get(&**symbol_name) {
+                    None => {return Err(RuntimeError::VarDoesNotExist(symbol_name.clone()))},
+                    Some((ptr,datatype)) => {
+                        match value {
+                            Some(data) => {
+                                typecheck(symbol_name, *datatype, &data)?;
+                                self.heap.get_mut().replace(ptr, data);
+                            },
+                            None => {
+                                self.heap.get_mut().replace(ptr,DataValue::None);
+                            }
+                        }
+                    },
 
+                }
+            }
+            Expression::BinaryOp(left, op, right) => {
+                match op {
+                    BinOp::Plus => {},
+                    BinOp::Minus => {},
+                    BinOp::Multi => {},
+                    BinOp::Divide => {},
+                    BinOp::Eq => {},
+                    BinOp::Neq => {},
+                    BinOp::Gt => {},
+                    BinOp::Ge => {},
+                    BinOp::Lt => {},
+                    BinOp::Le => {},
+                    BinOp::And => {},
+                    BinOp::Or => {},
+                }
             },
             Expression::Symbol(var) => return self.lookup_symbol(symtbl, var),
             Expression::Literal(value) => return Ok(Some(value.clone())),
@@ -231,8 +244,8 @@ fn execute_bin_expr(left: &DataValue,op: BinOp, right: &DataValue){
 
 }
 
-fn typecheck(binding: &VariableBinding,value: &DataValue) -> Result<(),RuntimeError> {
-    match binding.data_type {
+fn typecheck(symbol: &str,data_type: DataType,value: &DataValue) -> Result<(),RuntimeError> {
+    match data_type {
         DataType::Float => {
             if let DataValue::Float(_) = value {
                 return Ok(());
@@ -255,7 +268,7 @@ fn typecheck(binding: &VariableBinding,value: &DataValue) -> Result<(),RuntimeEr
         },
     }
 
-    Err(RuntimeError::WrongType(binding.symbol.clone(),value.clone(),binding.data_type))
+    Err(RuntimeError::WrongType(symbol.to_owned(),value.clone(),data_type))
 }
 
 /// wrapper for a function declaration
@@ -298,7 +311,7 @@ pub enum RuntimeError {
 }
 
 impl From<AllocError> for RuntimeError{
-    fn from(alloc_error: AllocError) -> Self {
+    fn from(_: AllocError) -> Self {
         RuntimeError::OutOfMemory
     }
 }
