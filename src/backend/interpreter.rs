@@ -4,6 +4,8 @@ use crate::backend::memory::{MemUnit, Ptr, AllocError};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Statement, VariableBinding, Expression, BinOp};
 use std::cell::RefCell;
+use std::str::FromStr;
+use std::num::{ParseIntError};
 
 type FnTable<'a> = HashMap<&'a str, Funct<'a>>;
 type SymbolTable<'b> = HashMap<&'b str,(Ptr,DataType)>;
@@ -164,9 +166,11 @@ impl <'a>RuntimeInterpreter<'a> {
                         },
                     }
                 }
+                Err(RuntimeError::FnNotExist(name.clone()))
             },
             Expression::UnaryOp(unary_op, expr) => {
                 //TODO
+                Err(RuntimeError::GeneralError("unary operator not implemented yet".into()))
             },
             Expression::Assignment(symbol_name, expr) => {
                 let value = self.resolve_expression(expr,symtbl)?;
@@ -183,30 +187,25 @@ impl <'a>RuntimeInterpreter<'a> {
                             }
                         }
                     },
-
                 }
+                Ok(None)
             }
-            Expression::BinaryOp(left, op, right) => {
-                match op {
-                    BinOp::Plus => {},
-                    BinOp::Minus => {},
-                    BinOp::Multi => {},
-                    BinOp::Divide => {},
-                    BinOp::Eq => {},
-                    BinOp::Neq => {},
-                    BinOp::Gt => {},
-                    BinOp::Ge => {},
-                    BinOp::Lt => {},
-                    BinOp::Le => {},
-                    BinOp::And => {},
-                    BinOp::Or => {},
-                }
-            },
+            Expression::BinaryOp(left_expr, op, right_expr) => self.execute_bin_expr(symtbl, left_expr, *op, right_expr),
             Expression::Symbol(var) => return self.lookup_symbol(symtbl, var),
             Expression::Literal(value) => return Ok(Some(value.clone())),
-        };
+        }?;
 
         Ok(None)
+    }
+
+    fn execute_bin_expr(&mut self, symtbl: &mut SymbolTable<'a>, left_expr: &'a Box<Expression>, op: BinOp, right_expr: &'a Box<Expression>) -> Result<Option<DataValue>,RuntimeError> {
+        let left = self.resolve_expression(left_expr, symtbl)?;
+        let right = self.resolve_expression(right_expr, symtbl)?;
+        match (left, right) {
+            (Some(left_value), Some(right_value)) => { Ok(Some(execute_bin_expr(&left_value, op, &right_value)?)) },
+            (None, _) => Err(RuntimeError::GeneralError(format!("Left side of expression resolved to None: {:#?}", left_expr))),
+            (_, None) => Err(RuntimeError::GeneralError(format!("Right side of expression resolved to None: {:#?}", right_expr))),
+        }
     }
 
     fn lookup_symbol(&mut self, symtbl: &mut SymbolTable<'a>, var: &'a String) -> Result<Option<DataValue>,RuntimeError> {
@@ -240,8 +239,31 @@ impl <'a>RuntimeInterpreter<'a> {
     }
 }
 
-fn execute_bin_expr(left: &DataValue,op: BinOp, right: &DataValue){
-
+fn execute_bin_expr(left: &DataValue,op: BinOp, right: &DataValue) -> Result<DataValue,RuntimeError> {
+    //TODO implement binary operator, todo parsen eines Values in eigene Funktion mit Error Meldung
+    match op {
+        BinOp::Plus => {match left {
+            DataValue::Integer(i) => {
+                let i = i64::from_str(i)?;
+            },
+            DataValue::Float(f) => {},
+            DataValue::Boolean(b) => {},
+            DataValue::String(s) => {},
+            DataValue::None => {},
+        }},
+        BinOp::Minus => {},
+        BinOp::Multi => {},
+        BinOp::Divide => {},
+        BinOp::Eq => {},
+        BinOp::Neq => {},
+        BinOp::Gt => {},
+        BinOp::Ge => {},
+        BinOp::Lt => {},
+        BinOp::Le => {},
+        BinOp::And => {},
+        BinOp::Or => {},
+    }
+    unimplemented!("binary expression are not implemented yet")
 }
 
 fn typecheck(symbol: &str,data_type: DataType,value: &DataValue) -> Result<(),RuntimeError> {
@@ -307,11 +329,18 @@ pub enum RuntimeError {
     TypeError(DataValue,DataType),
     FnArgsCountMismatch{name: String,found: u8,expected: u8},
     WrongType(String,DataValue,DataType),
+    GeneralError(String),
     OutOfMemory,
 }
 
 impl From<AllocError> for RuntimeError{
     fn from(_: AllocError) -> Self {
         RuntimeError::OutOfMemory
+    }
+}
+
+impl From<ParseIntError> for RuntimeError {
+    fn from(e: ParseIntError) -> Self {
+        RuntimeError::GeneralError("Could not Parse Int value".to_string())
     }
 }
