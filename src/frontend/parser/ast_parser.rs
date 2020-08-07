@@ -4,6 +4,7 @@ use crate::frontend::parser::error::ParseError;
 use crate::frontend::syntax::ast::{AbstractSyntaxTree, Block, Expression, Statement, VariableBinding, BinOp, UnOp};
 use crate::frontend::syntax::{DataType, DataValue};
 use crate::frontend::syntax::token::{Token, TokenStream, TokenType};
+use crate::frontend::parser::ParseInto;
 
 const TOKEN_STACK_SIZE: usize = 3;
 
@@ -291,8 +292,8 @@ impl ASTParser {
             TokenType::BooleanTrue => Ok(Expression::Literal(DataValue::Boolean(true))),
             TokenType::BooleanFalse => Ok(Expression::Literal(DataValue::Boolean(false))),
             TokenType::Identifier => Ok(Expression::Symbol(token.move_value())),
-            TokenType::LiteralInteger => Ok(Expression::Literal(DataValue::Integer(token.move_value()))),
-            TokenType::LiteralFloat => Ok(Expression::Literal(DataValue::Float(token.move_value()))),
+            TokenType::LiteralInteger => Ok(Expression::Literal(DataValue::Integer(token.parse()?))),
+            TokenType::LiteralFloat => Ok(Expression::Literal(DataValue::Float(token.parse()?))),
             TokenType::LiteralString => Ok(Expression::Literal(DataValue::String(token.move_value()))),
             TokenType::SeparatorBracketOpen => {
                 let expr = self.parse_expression()?;

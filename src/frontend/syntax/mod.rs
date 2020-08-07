@@ -5,8 +5,8 @@ pub mod token;
 /// Represents basic data types
 #[derive(PartialEq,PartialOrd,Clone,Debug)]
 pub enum DataValue {
-    Integer(String),
-    Float(String),
+    Integer(i64),
+    Float(f64),
     Boolean(bool),
     String(String),
     None,

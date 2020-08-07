@@ -86,6 +86,10 @@ impl Token {
     pub fn move_value(self) -> String{
         self.value
     }
+
+    pub fn value(&self) -> &str {
+        &self.value
+    }
 }
 
 
